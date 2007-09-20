@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.ecf.examples"
       label="%featureName"
-      version="1.1.0.qualifier"
+      version="1.0.3.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.ecf.example.collab">
 
@@ -46,7 +46,6 @@
       <import plugin="org.eclipse.ecf.provider"/>
       <import plugin="org.eclipse.ecf.datashare"/>
       <import plugin="org.eclipse.ecf.provider.datashare"/>
-      <import plugin="org.eclipse.ecf.server.generic"/>
    </requires>
 
    <plugin
