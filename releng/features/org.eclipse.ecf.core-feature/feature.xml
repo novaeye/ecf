@@ -60,20 +60,6 @@ Contributors: Composent, Inc. - initial API and implementation
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.ecf.identity"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ecf"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.ecf.sharedobject"
          download-size="0"
          install-size="0"
@@ -102,13 +88,6 @@ Contributors: Composent, Inc. - initial API and implementation
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.ecf.filetransfer"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.ecf.presence"
          download-size="0"
          install-size="0"
@@ -124,13 +103,6 @@ Contributors: Composent, Inc. - initial API and implementation
 
    <plugin
          id="org.eclipse.ecf.provider.datashare"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ecf.provider.filetransfer"
          download-size="0"
          install-size="0"
          version="0.0.0"
