@@ -2,8 +2,11 @@
 
 feature@org.eclipse.ecf.core=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/features/org.eclipse.ecf.core-feature
 
-plugin@org.eclipse.ecf=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf
-plugin@org.eclipse.ecf.identity=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.core.identity 
+plugin@org.eclipse.ecf,2.0.0=GET,http://download.eclipse.org/technology/ecf/integration/v20080324-0800/update/plugins/org.eclipse.ecf_2.0.0.v20080324-0800.jar,usetimestamp=true
+plugin@org.eclipse.ecf.identity,2.0.0=GET,http://download.eclipse.org/technology/ecf/integration/v20080324-0800/update/plugins/org.eclipse.ecf.identity_2.0.0.v20080324-0800.jar,usetimestamp=true
+plugin@org.eclipse.ecf.filetransfer,2.0.0=GET,http://download.eclipse.org/technology/ecf/integration/v20080324-0800/update/plugins/org.eclipse.ecf.filetransfer_2.0.0.v20080324-0800.jar,usetimestamp=true
+plugin@org.eclipse.ecf.provider.filetransfer,2.0.0=GET,http://download.eclipse.org/technology/ecf/integration/v20080324-0800/update/plugins/org.eclipse.ecf.provider.filetransfer_2.0.0.v20080324-0800.jar,usetimestamp=true
+
 plugin@org.eclipse.ecf.sharedobject=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.core.sharedobject
 plugin@org.eclipse.ecf.telephony.call=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.telephony.call
 plugin@org.eclipse.ecf.telephony.call.ui=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.telephony.call.ui
@@ -11,7 +14,6 @@ plugin@org.eclipse.ecf.datashare=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cv
 plugin@org.eclipse.ecf.discovery=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.discovery
 plugin@org.eclipse.ecf.discovery.ui=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.discovery.ui
 plugin@org.eclipse.ecf.doc=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.doc
-plugin@org.eclipse.ecf.filetransfer=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.filetransfer
 plugin@org.eclipse.ecf.presence=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.presence
 plugin@org.eclipse.ecf.presence.bot=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.presence.bot
 plugin@org.eclipse.ecf.presence.ui=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.presence.ui
@@ -19,7 +21,6 @@ plugin@org.eclipse.ecf.presence.collab.ui=@CVSTag@,:pserver:anonymous@dev.eclips
 plugin@org.eclipse.ecf.provider=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.provider
 plugin@org.eclipse.ecf.provider.datashare=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.provider.datashare
 plugin@org.eclipse.ecf.provider.discovery=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.provider.discovery
-plugin@org.eclipse.ecf.provider.filetransfer=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.provider.filetransfer
 plugin@org.eclipse.ecf.provider.filetransfer.httpclient=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/providers/org.eclipse.ecf.provider.filetransfer.httpclient
 plugin@org.eclipse.ecf.provider.filetransfer.efs=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/providers/org.eclipse.ecf.provider.filetransfer.efs
 plugin@org.eclipse.ecf.provider.irc=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/plugins/org.eclipse.ecf.provider.irc
