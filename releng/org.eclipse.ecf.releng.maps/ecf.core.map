@@ -1,6 +1,6 @@
 !****************  ECF CORE CONTRIBUTION  ******************************************************** 
 
-feature@org.eclipse.ecf.core=Root_p2_workaround_@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/features/org.eclipse.ecf.core-feature
+feature@org.eclipse.ecf.core=Root_p2_workaround,:pserver:anonymous@dev.eclipse.org:/cvsroot/technology,,org.eclipse.ecf/features/org.eclipse.ecf.core-feature
 
 plugin@org.eclipse.ecf,2.0.0=GET,http://download.eclipse.org/technology/ecf/integration/v20080324-0800/update/plugins/org.eclipse.ecf_2.0.0.v20080324-0800.jar,usetimestamp=true
 plugin@org.eclipse.ecf.identity,2.0.0=GET,http://download.eclipse.org/technology/ecf/integration/v20080324-0800/update/plugins/org.eclipse.ecf.identity_2.0.0.v20080324-0800.jar,usetimestamp=true
