@@ -49,7 +49,7 @@ Contributors: Composent, Inc. - initial API and implementation
       <import plugin="com.jcraft.jsch"/>
       <import plugin="org.eclipse.ecf"/>
       <import plugin="org.eclipse.ecf.filetransfer"/>
-      <import plugin="org.eclipse.ui.workbench.texteditor" version="3.4.0" match="greaterOrEqual"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
       <import plugin="org.eclipse.ecf.provider.filetransfer"/>
       <import plugin="org.eclipse.ecf.identity"/>
    </requires>
