@@ -28,12 +28,10 @@ public abstract class AbstractDiscoveryTest extends TestCase {
 	protected final static String QUERY = "someQuery";
 	protected final static String FRAGMENT = "aFragment";
 
-	protected final static String[] SERVICES = new String[] {"service", "ecf", "tests"};
+	protected final static String[] SERVICES = new String[] {"ecf", "tests"};
 	protected final static String SERVICE_TYPE = "_" + SERVICES[0] + "._" + SERVICES[1] + "._" + SERVICES[2] + "._" + PROTOCOL + "." + SCOPE + "._" + NAMINGAUTHORITY;
 	
 	public URI createDefaultURI() {
-//TODO-mkuppe eventually we want to support a complete URI. Then uncomment!
-//		return URI.create(PROTOCOL + "://" + USERNAME + ":" + PASSWORD + "@" + getHost() + ":" + PORT + "/" + PATH + "?" + QUERY + "#" + FRAGMENT);
 		return URI.create(PROTOCOL + "://" + USERNAME + "@" + getHost() + ":" + PORT + PATH);
 	}
 	
