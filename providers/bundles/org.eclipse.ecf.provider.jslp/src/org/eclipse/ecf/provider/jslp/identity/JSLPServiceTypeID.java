@@ -28,7 +28,7 @@ public class JSLPServiceTypeID extends ServiceTypeID {
 
 	private static final long serialVersionUID = -4558132760112793805L;
 
-	private ServiceType st;
+	private final ServiceType st;
 
 	protected JSLPServiceTypeID(final Namespace namespace, final String type) throws IDCreateException {
 		super(namespace);
@@ -58,7 +58,7 @@ public class JSLPServiceTypeID extends ServiceTypeID {
 		}
 	}
 
-	JSLPServiceTypeID(final Namespace namespace, final ServiceURL anURL, final String[] scopes) {
+	JSLPServiceTypeID(final Namespace namespace, final ServiceURL anURL, final String[] scopes) throws IDCreateException {
 		this(namespace, anURL.getServiceType());
 
 		if (scopes != null && scopes.length > 0) {
@@ -91,24 +91,13 @@ public class JSLPServiceTypeID extends ServiceTypeID {
 		st = new ServiceType(string.substring(0, string.length() - 1));
 	}
 
-	JSLPServiceTypeID(Namespace namespace, ServiceType aServiceType) {
-		super(namespace);
-		st = aServiceType;
-
-		final String na = st.getNamingAuthority();
-		String str = st.toString();
-		if (na.equals("")) { //$NON-NLS-1$
-			namingAuthority = DEFAULT_NA;
-		} else {
-			namingAuthority = na;
-			// remove the naming authority from the string
-			str = replaceAllIgnoreCase(str, "." + na, ""); //$NON-NLS-1$//$NON-NLS-2$
+	JSLPServiceTypeID(final Namespace namespace, final ServiceType aServiceType) throws IDCreateException {
+		this(namespace, aServiceType.toString());
+		final String[] newServices = new String[services.length - 1];
+		for (int i = 0; i < services.length - 1; i++) {
+			newServices[i] = services[i + 1];
 		}
-
-		services = StringUtils.split(str.substring(8), JSLP_DELIM);
-		scopes = DEFAULT_SCOPE; //TODO-mkuppe https://bugs.eclipse.org/218308
-		protocols = DEFAULT_PROTO; //TODO-mkuppe https://bugs.eclipse.org/230182
-
+		services = newServices;
 		createType();
 	}
 
