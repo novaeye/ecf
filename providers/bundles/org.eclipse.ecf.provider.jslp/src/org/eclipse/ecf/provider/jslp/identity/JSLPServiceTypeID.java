@@ -138,7 +138,7 @@ public class JSLPServiceTypeID extends ServiceTypeID {
 	 * @see StringUtils#replaceAll(String, String, String) but case insensitive
 	 */
 	//TODO-mkuppe https://bugs.eclipse.org/233807
-	public static String replaceAllIgnoreCase(String string, String target, String replace) {
+	private static String replaceAllIgnoreCase(String string, String target, String replace) {
 		final int index = string.toLowerCase().indexOf(target.toLowerCase());
 		if (index == -1)
 			return string;
