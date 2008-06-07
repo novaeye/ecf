@@ -4,53 +4,17 @@
    <extension
          point="org.eclipse.ecf.containerFactory">
       <containerFactory
-            class="org.eclipse.ecf.provider.xmpp.container.XMPPContainerInstantiator"
+            class="org.eclipse.ecf.internal.provider.xmpp.XMPPContainerInstantiator"
             description="XMPP (Jabber)"
             name="ecf.xmpp.smack">
-         <property
-               value="true"
-               name="org.eclipse.ecf.example.collab.ui.JoinGroupWizardPage.usepassword"/>
-         <property
-               value="&lt;user&gt;@&lt;jabberserver&gt;[:port]"
-               name="org.eclipse.ecf.example.collab.ui.JoinGroupWizardPage.examplegroupid"/>
-         <property
-               name="org.eclipse.ecf.example.collab.ui.JoinGroupWizardPage.defaultgroupid"
-               value=""/>
-         <property
-               value="xmpp:"
-               name="org.eclipse.ecf.example.collab.ui.JoinGroupWizardPage.urlprefix"/>
-         <property
-               value="Account:"
-               name="org.eclipse.ecf.example.collab.ui.JoinGroupWizardPage.groupIDLabel"/>
-         <property
-               name="org.eclipse.ecf.example.collab.ui.JoinGroupWizardPage.namespace"
-               value="ecf.xmpp.smack"/>
       </containerFactory>
    </extension>
    <extension
          point="org.eclipse.ecf.containerFactory">
       <containerFactory
-            class="org.eclipse.ecf.provider.xmpp.container.XMPPSContainerInstantiator"
-            description="XMPP SSL (Jabber)"
+            class="org.eclipse.ecf.internal.provider.xmpp.XMPPSContainerInstantiator"
+            description="XMPP SSL (Jabber SSL)"
             name="ecf.xmpps.smack">
-         <property
-               value="true"
-               name="org.eclipse.ecf.example.collab.ui.JoinGroupWizardPage.usepassword"/>
-         <property
-               value="&lt;user&gt;@&lt;jabberserver&gt;[:port]"
-               name="org.eclipse.ecf.example.collab.ui.JoinGroupWizardPage.examplegroupid"/>
-         <property
-               name="org.eclipse.ecf.example.collab.ui.JoinGroupWizardPage.defaultgroupid"
-               value=""/>
-         <property
-               value="xmpp:"
-               name="org.eclipse.ecf.example.collab.ui.JoinGroupWizardPage.urlprefix"/>
-         <property
-               value="Account:"
-               name="org.eclipse.ecf.example.collab.ui.JoinGroupWizardPage.groupIDLabel"/>
-         <property
-               name="org.eclipse.ecf.example.collab.ui.JoinGroupWizardPage.namespace"
-               value="ecf.xmpps.smack"/>
       </containerFactory>
    </extension>
    <extension
@@ -75,8 +39,58 @@
             name="xmpp.room.jive"/>
    </extension>
 
+   <extension
+         point="org.eclipse.ecf.identity.namespace">
+      <namespace
+            class="org.eclipse.ecf.provider.xmpp.identity.XMPPFileNamespace"
+            description="XMPP File Namespace"
+            name="ecf.provider.filetransfer.xmpp"/>
+   </extension>
+
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.eclipse.ecf.provider.xmpp.XMPPContainer"
+            class="org.eclipse.ecf.provider.datashare.DatashareContainerAdapterFactory">
+         <adapter type="org.eclipse.ecf.datashare.IChannelContainerAdapter"/>
+      </factory>
+   </extension>
+
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.eclipse.ecf.provider.xmpp.XMPPSContainer"
+            class="org.eclipse.ecf.provider.datashare.DatashareContainerAdapterFactory">
+         <adapter type="org.eclipse.ecf.datashare.IChannelContainerAdapter"/>
+      </factory>
+   </extension>
+
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.eclipse.ecf.provider.xmpp.XMPPContainer"
+            class="org.eclipse.ecf.internal.provider.xmpp.XMPPRemoteServiceAdapterFactory">
+         <adapter type="org.eclipse.ecf.remoteservice.IRemoteServiceContainerAdapter"/>
+      </factory>
+   </extension>
+
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.eclipse.ecf.provider.xmpp.XMPPSContainer"
+            class="org.eclipse.ecf.internal.provider.xmpp.XMPPRemoteServiceAdapterFactory">
+         <adapter type="org.eclipse.ecf.remoteservice.IRemoteServiceContainerAdapter"/>
+      </factory>
+   </extension>
+
    <extension-point id="iqProviders" name="IQ Providers" schema="schema/iqProvider.exsd"/>
    <extension-point id="extensionProviders" name="Extension Providers" schema="schema/extensionProvider.exsd"/>
    <extension-point id="providerDirectories" name="Provider Directories" schema="schema/providerDirectories.exsd"/>
-
+   <extension
+         point="org.eclipse.ecf.filetransfer.urlStreamHandlerService">
+      <urlStreamHandlerService
+            protocol="xmppfile"
+            serviceClass="org.eclipse.ecf.internal.provider.xmpp.XMPPFiletURLStreamHandlerService">
+      </urlStreamHandlerService>
+   </extension>
 </plugin>
