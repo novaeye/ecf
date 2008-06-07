@@ -33,11 +33,6 @@ import org.eclipse.equinox.app.IApplicationContext;
  */
 public class DiscoverableServer implements IApplication {
 
-	private static final String ECF_GENERIC_CLIENT = "ecf.generic.client"; //$NON-NLS-1$
-	private static final String ECF_GENERIC_SERVER = "ecf.generic.server"; //$NON-NLS-1$
-	private static final String ECF_GENERIC_SERVER_ID_NAMESPACE = StringID.class.getName();
-	private static final String ECF_GENERIC_SERVER_ID = "ecftcp://localhost:3285/server"; //$NON-NLS-1$
-
 	public static final String serviceHostContainerTypeArg = "-serviceHostContainerType"; //$NON-NLS-1$
 	public static final String serviceHostNamespaceArg = "-serviceHostNamespace"; //$NON-NLS-1$
 	public static final String serviceHostIDArg = "-serviceHostID"; //$NON-NLS-1$
@@ -46,11 +41,11 @@ public class DiscoverableServer implements IApplication {
 	public static final String serviceTypeArg = "-serviceType"; //$NON-NLS-1$
 
 	// Argument variables
-	private String serviceHostContainerType = ECF_GENERIC_SERVER;
-	private String serviceHostNamespace = ECF_GENERIC_SERVER_ID_NAMESPACE;
-	private String serviceHostID = ECF_GENERIC_SERVER_ID;
-	private String clientContainerType = ECF_GENERIC_CLIENT;
-	private String clientConnectTarget = ECF_GENERIC_SERVER_ID;
+	private String serviceHostContainerType = "ecf.generic.server"; //$NON-NLS-1$
+	private String serviceHostNamespace = StringID.class.getName();
+	private String serviceHostID = "ecftcp://localhost:3285/server"; //$NON-NLS-1$
+	private String clientContainerType = "ecf.generic.client"; //$NON-NLS-1$
+	private String clientConnectTarget = "ecftcp://localhost:3285/server"; //$NON-NLS-1$
 	private String serviceType = Constants.DISCOVERY_SERVICE_TYPE;
 
 	private IContainer serviceHostContainer;
