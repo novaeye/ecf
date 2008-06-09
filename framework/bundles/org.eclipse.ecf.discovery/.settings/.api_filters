@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.ecf.discovery" version="2">
+    <resource path="src/org/eclipse/ecf/discovery/service/IDiscoveryService.java" type="org.eclipse.ecf.discovery.service.IDiscoveryService">
+        <filter id="404791350">
+            <message_arguments>
+                <message_argument value="org.eclipse.ecf.discovery.service.IDiscoveryService"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF">
+        <filter id="924844039">
+            <message_arguments>
+                <message_argument value="2.0.0.qualifier"/>
+                <message_argument value="2.0.0.v20080603-1423"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="src/org/eclipse/ecf/discovery/AbstractDiscoveryContainerAdapter.java" type="org.eclipse.ecf.discovery.AbstractDiscoveryContainerAdapter">
+        <filter id="337682486">
+            <message_arguments>
+                <message_argument value="org.eclipse.ecf.discovery.AbstractDiscoveryContainerAdapter"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>
