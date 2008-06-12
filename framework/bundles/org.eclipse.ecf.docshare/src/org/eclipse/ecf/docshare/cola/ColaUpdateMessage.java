@@ -1,0 +1,80 @@
+/****************************************************************************
+ * Copyright (c) 2008 Mustafa K. Isik and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Mustafa K. Isik - initial API and implementation
+ *****************************************************************************/
+
+package org.eclipse.ecf.docshare.cola;
+
+import org.eclipse.ecf.core.util.Trace;
+import org.eclipse.ecf.docshare.messages.UpdateMessage;
+import org.eclipse.ecf.internal.docshare.Activator;
+import org.eclipse.ecf.internal.docshare.DocshareDebugOptions;
+
+public class ColaUpdateMessage extends UpdateMessage {
+
+	private static final long serialVersionUID = 2038025022180647210L;
+
+	// TODO encapsulate in a new ColaOpOriginationState and re-implement equals,
+	// hashCode, i.e. make comparable
+	final long localOperationsCount;
+	long remoteOperationsCount;
+	final TransformationStrategy trafoStrat;
+
+	public ColaUpdateMessage(UpdateMessage msg, long localOperationsCount, long remoteOperationsCount) {
+		super(msg.getOffset(), msg.getLength(), msg.getText());
+		this.localOperationsCount = localOperationsCount;
+		this.remoteOperationsCount = remoteOperationsCount;
+		if (super.getLength() == 0) {
+			// this is neither a replacement, nor a deletion
+			trafoStrat = ColaInsertion.getInstance();
+		} else {
+			if (super.getText().length() == 0) {
+				// something has been replaced, nothing inserted, must be a
+				// deletion
+				trafoStrat = ColaDeletion.getInstance();
+			} else {
+				// something has been replaced with some new input, has to be a
+				// replacement op
+				trafoStrat = ColaReplacement.getInstance();
+			}
+		}
+	}
+
+	public boolean isInsertion() {
+		return (this.trafoStrat instanceof ColaInsertion);
+	}
+
+	public boolean isDeletion() {
+		return (this.trafoStrat instanceof ColaDeletion);
+	}
+
+	public double getLocalOperationsCount() {
+		return this.localOperationsCount;
+	}
+
+	public double getRemoteOperationsCount() {
+		return this.remoteOperationsCount;
+	}
+
+	public ColaUpdateMessage transformAgainst(ColaUpdateMessage localMsg, boolean localMsgHighPrio) {
+		Trace.entering(Activator.PLUGIN_ID, DocshareDebugOptions.METHODS_ENTERING, this.getClass(), "transformAgainst", localMsg); //$NON-NLS-1$
+		ColaUpdateMessage transformedMsg = trafoStrat.getOperationalTransform(this, localMsg, localMsgHighPrio);
+		Trace.entering(Activator.PLUGIN_ID, DocshareDebugOptions.METHODS_EXITING, this.getClass(), "transformAgainst", transformedMsg); //$NON-NLS-1$
+		return transformedMsg;
+	}
+
+	public String toString() {
+		StringBuffer buf = new StringBuffer("ColaUpdateMessage["); //$NON-NLS-1$
+		buf.append("text=").append(getText()).append(";offset=").append(getOffset()); //$NON-NLS-1$ //$NON-NLS-2$
+		buf.append(";length=").append(getLength()).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
+		buf.append(";operationsCount[local=").append(getLocalOperationsCount()); //$NON-NLS-1$
+		buf.append(";remote=").append(getRemoteOperationsCount()).append("]]"); //$NON-NLS-1$//$NON-NLS-2$
+		return buf.toString();
+	}
+}
