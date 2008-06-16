@@ -10,7 +10,7 @@
  *    Mustafa K. Isik
  *****************************************************************************/
 
-package org.eclipse.ecf.docshare.messages;
+package org.eclipse.ecf.internal.provisional.docshare.messages;
 
 /**
  * 
@@ -48,16 +48,20 @@ public class UpdateMessage extends Message {
 	 * 
 	 * @return length of replaced text
 	 */
-	public int getLength() {
+	public int getLengthOfReplacedText() {
 		return length;
 	}
 
-	public void setLength(int length) {
+	public void setLengthOfReplacedText(int length) {
 		this.length = length;
 	}
 
 	public String getText() {
 		return text;
+	}
+
+	public int getLengthOfInsertedText() {
+		return this.text.length();
 	}
 
 	public String toString() {

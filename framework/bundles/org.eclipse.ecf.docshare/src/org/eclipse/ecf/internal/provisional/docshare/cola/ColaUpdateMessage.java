@@ -9,10 +9,13 @@
  *    Mustafa K. Isik - initial API and implementation
  *****************************************************************************/
 
-package org.eclipse.ecf.docshare.cola;
+package org.eclipse.ecf.internal.provisional.docshare.cola;
 
+import org.eclipse.ecf.internal.provisional.docshare.messages.UpdateMessage;
+
+import java.util.LinkedList;
+import java.util.List;
 import org.eclipse.ecf.core.util.Trace;
-import org.eclipse.ecf.docshare.messages.UpdateMessage;
 import org.eclipse.ecf.internal.docshare.Activator;
 import org.eclipse.ecf.internal.docshare.DocshareDebugOptions;
 
@@ -22,15 +25,19 @@ public class ColaUpdateMessage extends UpdateMessage {
 
 	// TODO encapsulate in a new ColaOpOriginationState and re-implement equals,
 	// hashCode, i.e. make comparable
-	final long localOperationsCount;
-	long remoteOperationsCount;
-	final TransformationStrategy trafoStrat;
+	private final long localOperationsCount;
+	private long remoteOperationsCount;
+	private final TransformationStrategy trafoStrat;
+	private boolean splitUp;
+	private List splitUpRepresentation;
 
 	public ColaUpdateMessage(UpdateMessage msg, long localOperationsCount, long remoteOperationsCount) {
-		super(msg.getOffset(), msg.getLength(), msg.getText());
+		super(msg.getOffset(), msg.getLengthOfReplacedText(), msg.getText());
 		this.localOperationsCount = localOperationsCount;
 		this.remoteOperationsCount = remoteOperationsCount;
-		if (super.getLength() == 0) {
+		this.splitUp = false;
+		this.splitUpRepresentation = new LinkedList();
+		if (super.getLengthOfReplacedText() == 0) {
 			// this is neither a replacement, nor a deletion
 			trafoStrat = ColaInsertion.getInstance();
 		} else {
@@ -54,11 +61,11 @@ public class ColaUpdateMessage extends UpdateMessage {
 		return (this.trafoStrat instanceof ColaDeletion);
 	}
 
-	public double getLocalOperationsCount() {
+	public long getLocalOperationsCount() {
 		return this.localOperationsCount;
 	}
 
-	public double getRemoteOperationsCount() {
+	public long getRemoteOperationsCount() {
 		return this.remoteOperationsCount;
 	}
 
@@ -72,9 +79,29 @@ public class ColaUpdateMessage extends UpdateMessage {
 	public String toString() {
 		StringBuffer buf = new StringBuffer("ColaUpdateMessage["); //$NON-NLS-1$
 		buf.append("text=").append(getText()).append(";offset=").append(getOffset()); //$NON-NLS-1$ //$NON-NLS-2$
-		buf.append(";length=").append(getLength()).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
+		buf.append(";length=").append(getLengthOfReplacedText()).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
 		buf.append(";operationsCount[local=").append(getLocalOperationsCount()); //$NON-NLS-1$
 		buf.append(";remote=").append(getRemoteOperationsCount()).append("]]"); //$NON-NLS-1$//$NON-NLS-2$
 		return buf.toString();
+	}
+
+	public void setSplitUp(boolean toBeSplitUp) {
+		this.splitUp = toBeSplitUp;
+	}
+
+	public boolean isSplitUp() {
+		return splitUp;
+	}
+
+	public void setSplitUpRepresentation(List splitUpRepresentation) {
+		this.splitUpRepresentation = splitUpRepresentation;
+	}
+
+	public List getSplitUpRepresentation() {
+		return splitUpRepresentation;
+	}
+
+	public void addToSplitUpRepresentation(ColaUpdateMessage splitUpRepresentationPart) {
+		this.splitUpRepresentation.add(splitUpRepresentationPart);
 	}
 }

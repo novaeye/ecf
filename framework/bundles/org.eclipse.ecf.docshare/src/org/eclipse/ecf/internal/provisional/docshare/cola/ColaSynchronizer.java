@@ -9,14 +9,15 @@
  *    Mustafa K. Isik - initial API and implementation
  *****************************************************************************/
 
-package org.eclipse.ecf.docshare.cola;
+package org.eclipse.ecf.internal.provisional.docshare.cola;
+
+import org.eclipse.ecf.internal.provisional.docshare.DocShare;
+import org.eclipse.ecf.internal.provisional.docshare.SynchronizationStrategy;
+import org.eclipse.ecf.internal.provisional.docshare.messages.UpdateMessage;
 
 import java.util.*;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.ecf.core.util.Trace;
-import org.eclipse.ecf.docshare.DocShare;
-import org.eclipse.ecf.docshare.SynchronizationStrategy;
-import org.eclipse.ecf.docshare.messages.UpdateMessage;
 import org.eclipse.ecf.internal.docshare.Activator;
 import org.eclipse.ecf.internal.docshare.DocshareDebugOptions;
 import org.eclipse.osgi.util.NLS;
@@ -104,14 +105,23 @@ public class ColaSynchronizer implements SynchronizationStrategy {
 			// queued up operations!!! 2008-06-08
 			if (!unacknowledgedLocalOperations.isEmpty()) {
 				ColaUpdateMessage localOp = (ColaUpdateMessage) unacknowledgedLocalOperations.getFirst();
-				Assert.isTrue(transformedRemote.getRemoteOperationsCount() == localOp.localOperationsCount);
-				for (final Iterator it = unacknowledgedLocalOperations.iterator(); it.hasNext();) {
+				Assert.isTrue(transformedRemote.getRemoteOperationsCount() == localOp.getLocalOperationsCount());
+				for (final ListIterator listIt = unacknowledgedLocalOperations.listIterator(); listIt.hasNext();) {
 					// returns new instance
 					// clarify operation preference, owner/docshare initiator
 					// consistently comes first
+					localOp = (ColaUpdateMessage) listIt.next();
+					transformedRemote = transformedRemote.transformAgainst(localOp, isInitiator);
 
-					transformedRemote = transformedRemote.transformAgainst((ColaUpdateMessage) it.next(), isInitiator);
-
+					//TODO check whether or not this collection shuffling does what it is supposed to, i.e. remove current localop in unack list and add split up representation instead
+					if (localOp.isSplitUp()) {
+						//local operation has been split up during operational transform --> remove current version and add new versions plus jump over those
+						listIt.remove();
+						for (final Iterator splitUpOpIterator = localOp.getSplitUpRepresentation().iterator(); splitUpOpIterator.hasNext();) {
+							listIt.add(splitUpOpIterator.next());
+						}
+						listIt.next();//jump over both inserted operations that replaced the current unack op
+					}//end split up localop handling
 				}
 			}
 

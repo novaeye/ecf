@@ -10,7 +10,10 @@
  *    Mustafa K. Isik - conflict resolution via operational transformations
  *****************************************************************************/
 
-package org.eclipse.ecf.docshare;
+package org.eclipse.ecf.internal.provisional.docshare;
+
+import org.eclipse.ecf.internal.provisional.docshare.cola.ColaSynchronizer;
+import org.eclipse.ecf.internal.provisional.docshare.messages.*;
 
 import java.io.*;
 import org.eclipse.core.filesystem.EFS;
@@ -23,8 +26,6 @@ import org.eclipse.ecf.core.util.Trace;
 import org.eclipse.ecf.datashare.AbstractShare;
 import org.eclipse.ecf.datashare.IChannelContainerAdapter;
 import org.eclipse.ecf.datashare.events.IChannelDisconnectEvent;
-import org.eclipse.ecf.docshare.cola.ColaSynchronizer;
-import org.eclipse.ecf.docshare.messages.*;
 import org.eclipse.ecf.internal.docshare.*;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.*;
@@ -322,7 +323,7 @@ public class DocShare extends AbstractShare {
 			// startContent
 			// directly
 			if (startContent != null) {
-				modifyStartContent(remoteMsg.getOffset(), remoteMsg.getLength(), remoteMsg.getText());
+				modifyStartContent(remoteMsg.getOffset(), remoteMsg.getLengthOfReplacedText(), remoteMsg.getText());
 				// And we're done
 				return;
 			}
@@ -346,7 +347,7 @@ public class DocShare extends AbstractShare {
 						// changing document
 						setEditorToRefuseInput();
 
-						document.replace(msgForLocalApplication.getOffset(), msgForLocalApplication.getLength(), msgForLocalApplication.getText());
+						document.replace(msgForLocalApplication.getOffset(), msgForLocalApplication.getLengthOfReplacedText(), msgForLocalApplication.getText());
 					}
 				} catch (final Exception e) {
 					logError(Messages.DocShare_EXCEPTION_RECEIVING_MESSAGE_TITLE, e);
