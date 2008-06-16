@@ -12,10 +12,9 @@
 
 package org.eclipse.ecf.internal.provisional.docshare;
 
-import org.eclipse.ecf.internal.provisional.docshare.cola.ColaSynchronizer;
-import org.eclipse.ecf.internal.provisional.docshare.messages.*;
-
 import java.io.*;
+import java.util.Iterator;
+import java.util.List;
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.*;
@@ -27,6 +26,9 @@ import org.eclipse.ecf.datashare.AbstractShare;
 import org.eclipse.ecf.datashare.IChannelContainerAdapter;
 import org.eclipse.ecf.datashare.events.IChannelDisconnectEvent;
 import org.eclipse.ecf.internal.docshare.*;
+import org.eclipse.ecf.internal.provisional.docshare.cola.ColaSynchronizer;
+import org.eclipse.ecf.internal.provisional.docshare.cola.ColaUpdateMessage;
+import org.eclipse.ecf.internal.provisional.docshare.messages.*;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.*;
 import org.eclipse.osgi.util.NLS;
@@ -108,7 +110,24 @@ public class DocShare extends AbstractShare {
 			Trace.trace(Activator.PLUGIN_ID, NLS.bind("{0}.documentChanged[{1}]", DocShare.this, event)); //$NON-NLS-1$
 			UpdateMessage msg = new UpdateMessage(event.getOffset(), event.getLength(), event.getText());
 			UpdateMessage colaMsg = sync.registerOutgoingMessage(msg);
-			sendUpdateMsg(colaMsg);
+
+			//TODO breaking DocShare & strategy independence, bad design, fix when refactoring for API 
+			if (((ColaUpdateMessage) colaMsg).isReplacement()) {
+				//this necessitates splitting up the replacement op into two distinct ops, del and ins
+				UpdateMessage delMsg = new UpdateMessage(event.getOffset(), event.getLength(), ""); //$NON-NLS-1$
+				UpdateMessage colaDelMsg = sync.registerOutgoingMessage(delMsg);
+				sendUpdateMsg(colaDelMsg);
+
+				int lengthOfNoDeletion = 0;
+				UpdateMessage insMsg = new UpdateMessage(event.getOffset(), lengthOfNoDeletion, event.getText());
+				UpdateMessage colaInsMsg = sync.registerOutgoingMessage(insMsg);
+				sendUpdateMsg(colaInsMsg);
+
+				Assert.isTrue(((ColaUpdateMessage) colaDelMsg).getRemoteOperationsCount() == ((ColaUpdateMessage) colaInsMsg).getRemoteOperationsCount(), "remote counters diverge - i.e. document has been modified during separation of replacement"); //$NON-NLS-1$
+			} else {
+				//standard case
+				sendUpdateMsg(colaMsg);
+			}
 		}
 	};
 
@@ -340,14 +359,17 @@ public class DocShare extends AbstractShare {
 						// The idea here is to be transparent with the sync'ing
 						// strategy.
 						Trace.trace(Activator.PLUGIN_ID, NLS.bind("{0}.handleUpdateMessage calling transformIncomingMessage", DocShare.this)); //$NON-NLS-1$
-						UpdateMessage msgForLocalApplication = sync.transformIncomingMessage(remoteMsg);
+						List messagesForLocalApplication = sync.transformIncomingMessage(remoteMsg);
 
 						// if (localState.equalsIgnoreCase(remoteState)) {
 						// We setup editor to not take input while we are
 						// changing document
 						setEditorToRefuseInput();
-
-						document.replace(msgForLocalApplication.getOffset(), msgForLocalApplication.getLengthOfReplacedText(), msgForLocalApplication.getText());
+						UpdateMessage currentMsg;
+						for (Iterator it = messagesForLocalApplication.iterator(); it.hasNext();) {
+							currentMsg = (UpdateMessage) it.next();
+							document.replace(currentMsg.getOffset(), currentMsg.getLengthOfReplacedText(), currentMsg.getText());
+						}
 					}
 				} catch (final Exception e) {
 					logError(Messages.DocShare_EXCEPTION_RECEIVING_MESSAGE_TITLE, e);
