@@ -22,6 +22,7 @@ package org.jivesoftware.smackx.provider;
 
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.provider.IQProvider;
+import org.jivesoftware.smack.util.StringUtils;
 import org.jivesoftware.smackx.packet.VCard;
 import org.w3c.dom.*;
 import org.xmlpull.v1.XmlPullParser;
@@ -31,11 +32,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.ArrayList;
 
 /**
- * vCard provider. 
+ * vCard provider.
  *
  * @author Gaston Dombiak
  */
@@ -49,7 +51,8 @@ public class VCardProvider implements IQProvider {
           while (true) {
               switch (event) {
                   case XmlPullParser.TEXT:
-                      sb.append(parser.getText());
+                      // We must re-escape the xml so that the DOM won't throw an exception
+                      sb.append(StringUtils.escapeForXML(parser.getText()));
                       break;
                   case XmlPullParser.START_TAG:
                       sb.append('<').append(parser.getName()).append('>');
@@ -79,7 +82,14 @@ public class VCardProvider implements IQProvider {
       try {
           DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
           DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-          Document document = documentBuilder.parse(new ByteArrayInputStream(xmlText.getBytes()));
+
+          byte[] bytes;
+          try {
+        	  bytes = xmlText.getBytes("UTF-8"); //$NON-NLS-1$
+          } catch (UnsupportedEncodingException e) {
+        	  bytes = xmlText.getBytes();
+          }
+          Document document = documentBuilder.parse(new ByteArrayInputStream(bytes));
 
           new VCardReader(vCard, document).initializeFields();
 
