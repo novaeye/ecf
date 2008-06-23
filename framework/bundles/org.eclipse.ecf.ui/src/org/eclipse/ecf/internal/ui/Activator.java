@@ -20,7 +20,7 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
 
-// XXX Comment to verify proper branch
+// XXX Comment to verify proper branch (Release_2_0)
 /**
  * The main plugin class to be used in the desktop.
  */
