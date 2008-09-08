@@ -1,69 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.eclipse.ecf.core"
-      label="ECF Core"
-      version="0.9.3"
-      provider-name="Eclipse.org">
+      label="%featureName"
+      version="2.0.1.qualifier"
+      provider-name="%providerName"
+      plugin="org.eclipse.ecf">
 
    <description url="http://www.eclipse.org/ecf">
-      Eclipse Communications Framework Core
+      This feature provides a core set of APIs for writing ECF-enabled applications.  This feature and the ECF Application feature are required to run ECF applications.
    </description>
 
    <copyright>
-      /*******************************************************************************
-* Copyright (c) 2004 Composent, Inc. and others. All rights reserved.
-* This program and the accompanying materials are made available
-* under the terms of the Eclipse Public License v1.0 which accompanies 
-* this distribution, and is available at 
-* http://www.eclipse.org/legal/epl-v10.html
-* 
-* Contributors: Composent, Inc. - initial API and implementation
-******************************************************************************/
+      Copyright (c) 2004, 2007 Composent, Inc. and others. All rights
+reserved.
+This program and the accompanying materials are made available
+under the terms of the Eclipse Public License v1.0 which accompanies
+this distribution, and is available at 
+http://www.eclipse.org/legal/epl-v10.html
+ 
+Contributors: Composent, Inc. - initial API and implementation
    </copyright>
 
-   <license url="http://www.eclipse.org/legal/epl-v10.html">
-      About This Content
-May 2, 2006
-License
-
-The Eclipse Foundation makes available all content in this plug-in
-(Content).  Unless otherwise indicated below, the Content 
-is provided to you under the terms and conditions of the Eclipse
-Public License Version 1.0 (EPL).  A copy of the EPL is 
-available at http://www.eclipse.org/legal/epl-v10.html.  For
-purposes of the EPL, Program will mean the Content.
-
-If you did not receive this Content directly from the Eclipse
-Foundation, the Content is being redistributed by another party
-(Redistributor) and different terms and conditions may apply
-to your use of any object code in the Content.  Check the
-Redistributor&apos;s license that was provided with the Content. 
-If no such license exists, contact the Redistributor.  Unless otherwise
-indicated below, the terms and conditions of the EPL still apply
-to any source code in the Content and such source code may be
-obtained at http://www.eclipse.org.
+   <license url="%licenseURL">
+      %license
    </license>
 
    <requires>
-      <import plugin="org.eclipse.help"/>
-      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.equinox.common"/>
+      <import plugin="org.eclipse.equinox.registry"/>
       <import plugin="org.eclipse.osgi"/>
+      <import plugin="org.eclipse.osgi.services"/>
+      <import plugin="org.eclipse.core.jobs"/>
+      <import plugin="org.eclipse.help"/>
+      <import plugin="org.eclipse.ui.intro"/>
+      <import plugin="org.eclipse.ui.intro.universal"/>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.equinox.app"/>
+      <import plugin="org.jivesoftware.smack" version="2.2.1" match="compatible"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.ui.forms"/>
+      <import plugin="org.eclipse.core.expressions"/>
+      <import plugin="org.eclipse.ui.console"/>
+      <import plugin="org.eclipse.core.filesystem"/>
+      <import plugin="org.eclipse.core.net"/>
+      <import plugin="org.eclipse.ecf.remoteservice"/>
+      <import plugin="org.eclipse.ui.views.properties.tabbed"/>
+      <import plugin="org.eclipse.ecf.ui"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="com.jcraft.jsch"/>
    </requires>
 
    <plugin
-         id="org.eclipse.ecf.doc"
+         id="org.jivesoftware.smack"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.0.0"
+         unpack="false"/>
 
    <plugin
-         id="org.eclipse.ecf.presence"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.ecf.discovery"
+         id="org.eclipse.ecf.identity"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -73,13 +70,8 @@ obtained at http://www.eclipse.org.
          id="org.eclipse.ecf"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-         id="org.eclipse.ecf.provider"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
+         version="0.0.0"
+         unpack="false"/>
 
    <plugin
          id="org.eclipse.ecf.sharedobject"
@@ -89,7 +81,316 @@ obtained at http://www.eclipse.org.
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.ecf.identity"
+         id="org.eclipse.ecf.datashare"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.discovery"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.doc"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.filetransfer"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.presence"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.datashare"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.filetransfer"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.irc"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.remoteservice"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.xmpp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.remoteservice"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.server"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.jmdns"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.presence.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.xmpp.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.irc.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.discovery.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.server.generic"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.bittorrent"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.bittorrent.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.filetransfer.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.msn"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.msn.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.presence.bot"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.telephony.call"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.telephony.call.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.protocol.msn"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.presence.collab.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.core.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.filetransfer.efs"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.docshare"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.discovery"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.filetransfer.scp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.jslp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="ch.ethz.iks.slp"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.remoteservice.ui"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.protocol.bittorrent"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.ssl"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.filetransfer.ssl"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         fragment="true"
+         unpack="false"/>
+
+   <plugin
+         id="ch.ethz.iks.r_osgi.remote"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.ecf.provider.r_osgi"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.objectweb.asm"
          download-size="0"
          install-size="0"
          version="0.0.0"
