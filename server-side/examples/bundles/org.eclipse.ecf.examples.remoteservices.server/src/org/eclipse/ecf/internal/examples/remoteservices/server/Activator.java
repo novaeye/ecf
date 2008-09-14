@@ -64,7 +64,7 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext ctxt) throws Exception {
 		plugin = this;
 		this.context = ctxt;
-		filter = context.createFilter("(&(" + Constants.OBJECTCLASS + "=" + IDiscoveryService.class.getName() + ")(" + IDiscoveryService.CONTAINER_NAME + "=ecf.discovery.composite))"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		filter = context.createFilter("(&(" + Constants.OBJECTCLASS + "=" + IDiscoveryService.class.getName() + ")(" + "org.eclipse.ecf.discovery.containerName=ecf.discovery.composite))"); //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 		// create and start discoverable server
 		//discoverableServer = new DiscoverableServer();
