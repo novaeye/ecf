@@ -18,10 +18,9 @@ import java.util.Iterator;
 import org.eclipse.ecf.core.identity.BaseID;
 import org.eclipse.ecf.core.identity.Namespace;
 import org.eclipse.ecf.internal.provider.xmpp.Messages;
-import org.eclipse.ecf.presence.IFQID;
 import org.eclipse.ecf.presence.im.IChatID;
 
-public class XMPPID extends BaseID implements IChatID, IFQID {
+public class XMPPID extends BaseID implements IChatID {
 
 	private static final long serialVersionUID = 3257289140701049140L;
 	public static final char USER_HOST_DELIMITER = '@';
