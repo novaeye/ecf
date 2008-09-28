@@ -17,6 +17,7 @@ import java.util.Iterator;
 
 import org.eclipse.ecf.core.identity.BaseID;
 import org.eclipse.ecf.core.identity.Namespace;
+import org.eclipse.ecf.core.util.StringUtils;
 import org.eclipse.ecf.internal.provider.xmpp.Messages;
 import org.eclipse.ecf.presence.im.IChatID;
 
@@ -38,8 +39,8 @@ public class XMPPID extends BaseID implements IChatID {
 			}
 		}
 
-		public CharSequence getAsCharSequence() {
-			return buf;
+		public String getAsString() {
+			return buf.toString();
 		}
 
 	}
@@ -66,7 +67,7 @@ public class XMPPID extends BaseID implements IChatID {
 		for (final Iterator i = escapeTable.keySet().iterator(); i.hasNext();) {
 			final String key = (String) i.next();
 			final XMPPEscape escape = (XMPPEscape) escapeTable.get(key);
-			node = node.replace(new StringBuffer(key), escape.getAsCharSequence());
+			node = StringUtils.replaceAll(node, key, escape.getAsString());
 		}
 		return node;
 	}
@@ -74,7 +75,7 @@ public class XMPPID extends BaseID implements IChatID {
 	static String fixPercentEscape(String src) {
 		if (src == null)
 			return null;
-		return src.replaceAll("%", "%25");
+		return StringUtils.replaceAll(src, "%", "%25");
 	}
 
 	public static String unfixEscapeInNode(String node) {
@@ -83,7 +84,7 @@ public class XMPPID extends BaseID implements IChatID {
 		for (final Iterator i = escapeTable.keySet().iterator(); i.hasNext();) {
 			final String key = (String) i.next();
 			final XMPPEscape escape = (XMPPEscape) escapeTable.get(key);
-			node = node.replace(escape.getAsCharSequence(), new StringBuffer(key));
+			node = StringUtils.replaceAll(node, escape.getAsString(), key);
 		}
 		return node;
 	}
