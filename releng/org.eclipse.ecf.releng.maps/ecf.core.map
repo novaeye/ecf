@@ -9,7 +9,6 @@ plugin@org.eclipse.ecf.datashare=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cv
 plugin@org.eclipse.ecf.discovery=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.discovery
 plugin@org.eclipse.ecf.discovery.ui=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.discovery.ui
 plugin@org.eclipse.ecf.doc=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/doc/bundles/org.eclipse.ecf.doc
-plugin@org.eclipse.ecf.filetransfer=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.filetransfer
 plugin@org.eclipse.ecf.presence=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.presence
 plugin@org.eclipse.ecf.presence.bot=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.presence.bot
 plugin@org.eclipse.ecf.presence.ui=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.presence.ui
