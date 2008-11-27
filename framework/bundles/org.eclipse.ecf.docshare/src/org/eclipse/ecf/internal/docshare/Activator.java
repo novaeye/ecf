@@ -15,8 +15,7 @@ import org.eclipse.ecf.core.IContainerManager;
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.util.ECFException;
 import org.eclipse.ecf.datashare.IChannelContainerAdapter;
-import org.eclipse.ecf.docshare.DocShare;
-import org.eclipse.ecf.sync.doc.IDocumentSynchronizationStrategyFactory;
+import org.eclipse.ecf.internal.provisional.docshare.DocShare;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -35,8 +34,6 @@ public class Activator extends AbstractUIPlugin {
 	private BundleContext context;
 
 	private ServiceTracker containerManagerTracker;
-
-	private ServiceTracker syncStrategyFactoryServiceTracker;
 
 	private boolean listenerActive;
 
@@ -90,12 +87,6 @@ public class Activator extends AbstractUIPlugin {
 			containerManagerTracker.close();
 			containerManagerTracker = null;
 		}
-
-		if (syncStrategyFactoryServiceTracker != null) {
-			syncStrategyFactoryServiceTracker.close();
-			syncStrategyFactoryServiceTracker = null;
-		}
-
 		plugin = null;
 		this.context = null;
 	}
@@ -115,19 +106,6 @@ public class Activator extends AbstractUIPlugin {
 			containerManagerTracker.open();
 		}
 		return (IContainerManager) containerManagerTracker.getService();
-	}
-
-	/**
-	 * Returns a Synch Strategy Factory for Cola
-	 * 
-	 * @return IDocumentSynchronizationStrategyFactory
-	 */
-	public IDocumentSynchronizationStrategyFactory getColaSynchronizationStrategyFactory() {
-		if (syncStrategyFactoryServiceTracker == null) {
-			syncStrategyFactoryServiceTracker = new ServiceTracker(context, IDocumentSynchronizationStrategyFactory.class.getName(), null);
-			syncStrategyFactoryServiceTracker.open();
-		}
-		return (IDocumentSynchronizationStrategyFactory) syncStrategyFactoryServiceTracker.getService();
 	}
 
 }
