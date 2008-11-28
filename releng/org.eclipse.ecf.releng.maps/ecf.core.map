@@ -1,6 +1,6 @@
 !****************  ECF CORE CONTRIBUTION  ******************************************************** 
 
-feature@org.eclipse.ecf.core=CVS,tag=p2_workaround_34ecf2_0,cvsRoot=:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,path=org.eclipse.ecf/releng/features/org.eclipse.ecf.core-feature
+feature@org.eclipse.ecf.core=CVS,tag=R21p2workaround_1,cvsRoot=:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,path=org.eclipse.ecf/releng/features/org.eclipse.ecf.core-feature
 
 plugin@org.eclipse.ecf.sharedobject=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.sharedobject
 plugin@org.eclipse.ecf.telephony.call=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.telephony.call
