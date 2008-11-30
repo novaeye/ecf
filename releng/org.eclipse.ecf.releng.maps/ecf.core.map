@@ -1,6 +1,6 @@
 !****************  ECF CORE CONTRIBUTION  ******************************************************** 
 
-feature@org.eclipse.ecf.core=CVS,R21p2workaround_1,cvsRoot=:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,path=org.eclipse.ecf/releng/features/org.eclipse.ecf.core-feature
+feature@org.eclipse.ecf.core=CVS,tag=p2_workaround_1,cvsRoot=:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,path=org.eclipse.ecf/releng/features/org.eclipse.ecf.core-feature
 
 plugin@org.eclipse.ecf.sharedobject=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.sharedobject
 plugin@org.eclipse.ecf.telephony.call=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.telephony.call
@@ -42,7 +42,9 @@ plugin@org.eclipse.ecf.provider.filetransfer.scp=@CVSTag@,:pserver:anonymous@dev
 plugin@org.eclipse.ecf.provider.jslp=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/providers/bundles/org.eclipse.ecf.provider.jslp
 plugin@ch.ethz.iks.r_osgi.remote=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/protocols/bundles/ch.ethz.iks.r_osgi.remote
 plugin@org.eclipse.ecf.provider.r_osgi=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/providers/bundles/org.eclipse.ecf.provider.r_osgi
+plugin@org.eclipse.ecf.sync=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.sync
+plugin@org.eclipse.ecf.storage=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.storage
+plugin@ch.ethz.iks.slp=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/protocols/bundles/ch.ethz.iks.slp
 
-plugin@ch.ethz.iks.slp,1.0.0=GET,http://download.eclipse.org/tools/orbit/downloads/drops/R20080611105805/bundles/ch.ethz.iks.slp_1.0.0.RC4_v200806091030.jar
 plugin@com.jcraft.jsch,0.1.31=GET,http://download.eclipse.org/tools/orbit/downloads/drops/R20080611105805/bundles/com.jcraft.jsch_0.1.31.jar
 plugin@org.objectweb.asm,3.0.0=GET,http://download.eclipse.org/tools/orbit/downloads/drops/R20080611105805/bundles/org.objectweb.asm_3.0.0.v200803061811.jar
