@@ -2,10 +2,7 @@
 <feature
       id="org.eclipse.ecf.core"
       label="%featureName"
-
       version="2.1.0.qualifier"
-
-
       provider-name="%providerName"
       plugin="org.eclipse.ecf">
 
@@ -39,6 +36,8 @@ Contributors: Composent, Inc. - initial API and implementation
       <import plugin="org.eclipse.ui.intro.universal"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.equinox.app"/>
+
+
       <import plugin="org.eclipse.core.net"/>
       <import plugin="org.eclipse.jface.text"/>
       <import plugin="org.eclipse.core.runtime"/>
@@ -50,25 +49,15 @@ Contributors: Composent, Inc. - initial API and implementation
       <import plugin="org.eclipse.core.filesystem"/>
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="com.jcraft.jsch"/>
+
+
       <import plugin="org.eclipse.ui.workbench.texteditor"/>
+
+
    </requires>
 
    <plugin
          id="org.jivesoftware.smack"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ecf.identity"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ecf"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -103,13 +92,6 @@ Contributors: Composent, Inc. - initial API and implementation
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.ecf.filetransfer"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.ecf.presence"
          download-size="0"
          install-size="0"
@@ -125,13 +107,6 @@ Contributors: Composent, Inc. - initial API and implementation
 
    <plugin
          id="org.eclipse.ecf.provider.datashare"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ecf.provider.filetransfer"
          download-size="0"
          install-size="0"
          version="0.0.0"
@@ -361,22 +336,6 @@ Contributors: Composent, Inc. - initial API and implementation
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.ecf.ssl"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ecf.provider.filetransfer.ssl"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="ch.ethz.iks.r_osgi.remote"
          download-size="0"
          install-size="0"
@@ -392,42 +351,6 @@ Contributors: Composent, Inc. - initial API and implementation
 
    <plugin
          id="org.objectweb.asm"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ecf.provider.filetransfer.httpclient"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.ecf.provider.filetransfer.httpclient.ssl"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.codec"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.httpclient"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.apache.commons.logging"
          download-size="0"
          install-size="0"
          version="0.0.0"
