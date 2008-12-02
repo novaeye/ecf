@@ -29,10 +29,6 @@ public class JSLPServiceInfo extends ServiceInfo implements IServiceInfo {
 		super(anURI, serviceID, priority, weight, props);
 	}
 
-	/**
-	 * @param serviceID
-	 * @deprecated
-	 */
 	public JSLPServiceInfo(IServiceID serviceID) {
 		super(null, serviceID, DEFAULT_PRIORITY, DEFAULT_WEIGHT, new ServiceProperties());
 	}
