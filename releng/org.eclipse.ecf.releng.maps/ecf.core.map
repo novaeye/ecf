@@ -1,14 +1,16 @@
 !****************  ECF CORE CONTRIBUTION  ******************************************************** 
 
-
 feature@org.eclipse.ecf.core=CVS,tag=p2_workaround_3,cvsRoot=:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,path=org.eclipse.ecf/releng/features/org.eclipse.ecf.core-feature
-
 plugin@org.eclipse.ecf.sharedobject=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.sharedobject
 plugin@org.eclipse.ecf.telephony.call=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.telephony.call
 plugin@org.eclipse.ecf.telephony.call.ui=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.telephony.call.ui
 plugin@org.eclipse.ecf.datashare=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.datashare
 plugin@org.eclipse.ecf.discovery=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.discovery
 plugin@org.eclipse.ecf.discovery.ui=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.discovery.ui
+plugin@org.eclipse.ecf.discovery.ui.edit=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.discovery.ui.edit
+plugin@org.eclipse.ecf.discovery.ui.model=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.discovery.ui.model
+fragment@org.eclipse.ecf.discovery.ui.properties=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.discovery.ui.properties
+fragment@org.eclipse.ecf.discovery.ui.properties.tabbed=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.discovery.ui.properties.tabbed
 plugin@org.eclipse.ecf.doc=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/doc/bundles/org.eclipse.ecf.doc
 plugin@org.eclipse.ecf.presence=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.presence
 plugin@org.eclipse.ecf.presence.bot=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/framework/bundles/org.eclipse.ecf.presence.bot
@@ -49,3 +51,7 @@ plugin@ch.ethz.iks.slp=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,
 
 plugin@com.jcraft.jsch,0.1.31=GET,http://download.eclipse.org/tools/orbit/downloads/drops/R20080611105805/bundles/com.jcraft.jsch_0.1.31.jar
 plugin@org.objectweb.asm,3.0.0=GET,http://download.eclipse.org/tools/orbit/downloads/drops/R20080611105805/bundles/org.objectweb.asm_3.0.0.v200803061811.jar
+plugin@org.apache.commons.codec,1.2.0=GET,http://download.eclipse.org/tools/orbit/downloads/drops/R20080611105805/bundles/org.apache.commons.codec_1.2.0.v20080530-1550.jar
+plugin@org.apache.commons.httpclient,3.0.1=GET,http://download.eclipse.org/tools/orbit/downloads/drops/R20080611105805/bundles/org.apache.commons.httpclient_3.0.1.v20080605-1930.jar
+plugin@org.apache.commons.logging,1.0.4=GET,http://download.eclipse.org/tools/orbit/downloads/drops/R20080611105805/bundles/org.apache.commons.logging_1.0.4.v20080605-1930.jar
+k
