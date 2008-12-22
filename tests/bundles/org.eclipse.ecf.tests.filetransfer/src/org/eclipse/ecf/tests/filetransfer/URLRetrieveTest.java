@@ -15,8 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.ecf.core.util.Proxy;
 import org.eclipse.ecf.filetransfer.IFileTransferListener;
 import org.eclipse.ecf.filetransfer.IncomingFileTransferException;
 import org.eclipse.ecf.filetransfer.events.IIncomingFileTransferReceiveDataEvent;
@@ -26,7 +24,9 @@ import org.eclipse.ecf.filetransfer.identity.IFileID;
 
 public class URLRetrieveTest extends AbstractRetrieveTestCase {
 
-	private static final String HTTP_RETRIEVE = "http://www.eclipse.org/ecf/ip_log.html";
+	//private static final String HTTP_RETRIEVE = "http://www.eclipse.org/ecf/ip_log.html";
+	protected static final String HTTP_RETRIEVE = "http://download.eclipse.org/eclipse/updates/3.5-I-builds/plugins/javax.servlet.jsp_2.0.0.v200806031607.jar.pack.gz";
+	
 	protected static final String HTTPS_RETRIEVE = "https://www.verisign.com";
 	private static final String HTTP_404_FAIL_RETRIEVE = "http://www.google.com/googleliciousafdasdfasdfasdf";
 
@@ -42,7 +42,7 @@ public class URLRetrieveTest extends AbstractRetrieveTestCase {
 	 */
 	protected void setUp() throws Exception {
 		super.setUp();
-		tmpFile = File.createTempFile("ECFTest", "");
+		tmpFile = File.createTempFile("ECFTest", null);
 	}
 
 	/*
@@ -105,7 +105,7 @@ public class URLRetrieveTest extends AbstractRetrieveTestCase {
 			assertTrue(e instanceof IncomingFileTransferException);
 		}
 	}
-	
+
 
 	public void testReceiveGzipFile() throws Exception {
 		testReceive(BUG_237936_URL);
