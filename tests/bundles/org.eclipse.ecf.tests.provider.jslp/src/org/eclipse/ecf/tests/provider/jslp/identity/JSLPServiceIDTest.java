@@ -82,7 +82,7 @@ public class JSLPServiceIDTest extends ServiceIDTest {
 		final String internalRep = "service:foo.eclipse:bar";
 		final ServiceURL sUrl = new ServiceURL(internalRep + "://localhost:1234/a/path/to/something", ServiceURL.LIFETIME_PERMANENT);
 
-		final IServiceInfo serviceInfo = new JSLPServiceInfo(new ServiceURLAdapter(sUrl, "aServiceNameString"), PRIORITY, WEIGHT, new ServicePropertiesAdapter(new ArrayList()));
+		final IServiceInfo serviceInfo = new JSLPServiceInfo(new ServiceURLAdapter(sUrl, ASERVICENAME), PRIORITY, WEIGHT, new ServicePropertiesAdapter(new ArrayList()));
 		assertEquals(serviceInfo.getPriority(), PRIORITY);
 		assertEquals(serviceInfo.getWeight(), WEIGHT);
 		final IServiceID sid = serviceInfo.getServiceID();
