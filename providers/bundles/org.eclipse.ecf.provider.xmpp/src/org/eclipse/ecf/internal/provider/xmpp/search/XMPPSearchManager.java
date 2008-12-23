@@ -23,6 +23,7 @@ import org.eclipse.ecf.core.identity.IDCreateException;
 import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.core.identity.Namespace;
 import org.eclipse.ecf.core.user.User;
+import org.eclipse.ecf.internal.provider.xmpp.Messages;
 import org.eclipse.ecf.internal.provider.xmpp.smack.ECFConnection;
 import org.eclipse.ecf.presence.search.ICriteria;
 import org.eclipse.ecf.presence.search.ICriterion;
@@ -131,7 +132,13 @@ public class XMPPSearchManager implements IUserSearchManager {
 			
 			return search;
 		} catch (final XMPPException e) {
-			throw new ContainerConnectException(e.getLocalizedMessage(), e);
+			String message = null;
+            if (e.getXMPPError() != null && e.getXMPPError().getCode() == 404) {
+            	message = Messages.XMPPContainer_UNRECOGONIZED_SEARCH_SERVICE;
+            } else
+            	message = e.getLocalizedMessage();
+                
+			throw new ContainerConnectException(message, e);
 		}
 
 	}
@@ -221,6 +228,11 @@ public class XMPPSearchManager implements IUserSearchManager {
 		this.connectedID = connectedID;
 		this.ecfConnection = connection;
 		
+	}
+
+	public String[] getUserPropertiesFields() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
