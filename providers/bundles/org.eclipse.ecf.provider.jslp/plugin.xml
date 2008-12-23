@@ -19,6 +19,7 @@
    <extension
          point="org.eclipse.ecf.start">
       <run
+            asynchronous="false"
             class="org.eclipse.ecf.internal.provider.jslp.ECFStart">
       </run>
    </extension>
