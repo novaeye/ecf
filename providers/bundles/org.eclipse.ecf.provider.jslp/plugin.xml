@@ -16,5 +16,11 @@
             description="JSLP Namespace"
             name="ecf.namespace.slp"/>
    </extension>
+   <extension
+         point="org.eclipse.ecf.start">
+      <run
+            class="org.eclipse.ecf.internal.provider.jslp.ECFStart">
+      </run>
+   </extension>
 
 </plugin>
