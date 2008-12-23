@@ -48,14 +48,6 @@ import org.jivesoftware.smackx.search.UserSearch;
  */
 public class XMPPSearchManager implements IUserSearchManager {
 
-	protected static final String FORM_TYPE = "FORM_TYPE";
-
-	protected static final String NAME = "name";
-
-	protected static final String JID = "jid";
-
-	protected static final String SEARCH_ACTION = "search";
-
 	/** Search service name on XMPP server */
 	protected static final String SERVICE_SEARCH = "search.";
 
@@ -66,6 +58,22 @@ public class XMPPSearchManager implements IUserSearchManager {
 
 	ID connectedID;
 
+	Form form;
+
+	UserSearch manager;
+
+	protected static final String FORM_TYPE = "FORM_TYPE";
+
+	protected static final String NAME = "name";
+
+	protected static final String JID = "jid";
+
+	protected static final String SEARCH_ACTION = "search";
+
+	
+	public XMPPSearchManager() {
+		manager = new UserSearch();
+	}
 	/**
 	 * Create a specific {@link ICriteria} for XMPP
 	 */
@@ -89,118 +97,101 @@ public class XMPPSearchManager implements IUserSearchManager {
 
 		try {
 
-			UserSearch manager = new UserSearch();
-			String host = ecfConnection.getXMPPConnection().getServiceName();
-			Form form = manager.getSearchForm(
-					ecfConnection.getXMPPConnection(), SERVICE_SEARCH + host);
-			
+			if (form == null)
+				form = manager.getSearchForm(ecfConnection.getXMPPConnection(),
+						SERVICE_SEARCH
+								+ ecfConnection.getXMPPConnection()
+										.getServiceName());
+
 			/*
-			 * For XMPP criterion is considered. The XMPP server will
-			 * deal with the search.
+			 * For XMPP criterion is considered. The XMPP server will deal with
+			 * the search.
 			 */
-			List criterions =  criteria.getCriterions();
+			List criterions = criteria.getCriterions();
 			Form answerForm = form.createAnswerForm();
 			// add the fields for the search dynamically
-			//consider just the fields used on the search
-			String fields[] = getUserPropertiesFields(form);
+			// consider just the fields used on the search
+			String fields[] = getUserPropertiesFields();
 
 			// type of action
-			//TODO make it better
+			// TODO make it better
 			Iterator it = criterions.iterator();
 			while (it.hasNext()) {
 				ICriterion criterion = (ICriterion) it.next();
-				if(criterion.equals(SEARCH_ACTION)){
-					answerForm.setAnswer(SEARCH_ACTION, criterion.toExpression());
+				if (criterion.equals(SEARCH_ACTION)) {
+					answerForm.setAnswer(SEARCH_ACTION, criterion
+							.toExpression());
 				}
-				
+
 				for (int i = 0; i < fields.length; i++) {
 					String fieldName = fields[i];
-					if(criterion.equals(fieldName)){
-						answerForm.setAnswer(fieldName,Boolean.valueOf(criterion.toExpression()).booleanValue());
+					if (criterion.equals(fieldName)) {
+						answerForm.setAnswer(fieldName, Boolean.valueOf(
+								criterion.toExpression()).booleanValue());
 						break;
 					}
 				}
 			}
-			
-			ReportedData data = manager.sendSearchForm(ecfConnection
-					.getXMPPConnection(), answerForm, SERVICE_SEARCH + host);
 
-			//create a result list from ReportedData
+			ReportedData data = manager.sendSearchForm(ecfConnection
+					.getXMPPConnection(), answerForm, SERVICE_SEARCH + ecfConnection.getXMPPConnection().getServiceName());
+
+			// create a result list from ReportedData
 			IResultList resultList = createResultList(data);
-			
+
 			ISearch search = new XMPPSearch(resultList);
-			
+
 			return search;
 		} catch (final XMPPException e) {
 			String message = null;
-            if (e.getXMPPError() != null && e.getXMPPError().getCode() == 404) {
-            	message = Messages.XMPPContainer_UNRECOGONIZED_SEARCH_SERVICE;
-            } else
-            	message = e.getLocalizedMessage();
-                
+			if (e.getXMPPError() != null && e.getXMPPError().getCode() == 404) {
+				message = Messages.XMPPContainer_UNRECOGONIZED_SEARCH_SERVICE;
+			} else
+				message = e.getLocalizedMessage();
+
 			throw new ContainerConnectException(message, e);
 		}
 
 	}
 
 	/**
-	 * Create a result list from ReportedData. 
-	 * Identify dynamically columns and rows and create users
-	 * adding it to a {@link IResultList}
+	 * Create a result list from ReportedData. Identify dynamically columns and
+	 * rows and create users adding it to a {@link IResultList}
+	 * 
 	 * @param data
 	 * @return {@link IResultList} a list of users
 	 */
 	protected IResultList createResultList(ReportedData data) {
-		
+
 		Collection users = new ArrayList(5);
-		
+
 		Iterator rows = data.getRows();
 		while (rows.hasNext()) {
 			Row row = (Row) rows.next();
-			
+
 			Iterator jids = row.getValues(JID);
 			Iterator names = row.getValues(NAME);
 			String jid = null;
 			String name = null;
-			//XMPP server returns the same length for both
+			// XMPP server returns the same length for both
 			while (jids.hasNext() && names.hasNext()) {
 				try {
-					jid = (String)jids.next();
-					name = (String)names.next();
-					users.add(new XMPPResultItem(new User(IDFactory.getDefault().createID(connectNamespace, jid), name)));
+					jid = (String) jids.next();
+					name = (String) names.next();
+					users.add(new XMPPResultItem(
+							new User(IDFactory.getDefault().createID(
+									connectNamespace, jid), name)));
 				} catch (final IDCreateException e) {
-					throw new RuntimeException("cannot create connect id for client " +jid +" , name = "+name, e);
+					throw new RuntimeException(
+							"cannot create connect id for client " + jid
+									+ " , name = " + name, e);
 				}
 			}
 		}
 
 		ResultList result = new ResultList(users);
-		
+
 		return result;
-	}
-
-	/**
-	 * Returns the user properties fields available on the XMPP server
-	 * 
-	 * @param form
-	 * @return String[] fields for form
-	 */
-	public String[] getUserPropertiesFields(Form form) {
-
-		Set fields = new HashSet();
-		Iterator userProperties = form.getFields();
-
-		while (userProperties.hasNext()) {
-			FormField field = (FormField) userProperties.next();
-			String variable = field.getVariable();
-			// ignore these fields
-			if (!variable.equalsIgnoreCase(FORM_TYPE)
-					&& !variable.equalsIgnoreCase(SEARCH_ACTION))
-				fields.add(variable);
-		}
-
-		String[] array = (String[]) fields.toArray(new String[0]);
-		return array;
 	}
 
 	/**
@@ -208,31 +199,67 @@ public class XMPPSearchManager implements IUserSearchManager {
 	 * 
 	 * @see IUserSearchManager#search(ICriteria).
 	 */
-	public void search(ICriteria criteria, IUserSearchListener listener){
-
+	public void search(ICriteria criteria, IUserSearchListener listener) {
 
 	}
 
 	/**
 	 * These parameters must be not null
+	 * 
 	 * @param connectNamespace
 	 * @param connectedID
 	 * @param connection
 	 */
-	public void setConnection(Namespace connectNamespace, ID connectedID, ECFConnection connection) {
+	public void setConnection(Namespace connectNamespace, ID connectedID,
+			ECFConnection connection) {
 		Assert.isNotNull(connectNamespace);
 		Assert.isNotNull(connectedID);
 		Assert.isNotNull(connection);
-		
+
 		this.connectNamespace = connectNamespace;
 		this.connectedID = connectedID;
 		this.ecfConnection = connection;
-		
+
 	}
 
-	public String[] getUserPropertiesFields() {
-		// TODO Auto-generated method stub
-		return null;
+	/**
+	 * Returns the user properties fields available on the XMPP server
+	 * 
+	 * @param form
+	 * @return String[] fields for form
+	 * @throws ContainerConnectException 
+	 */
+	public String[] getUserPropertiesFields() throws ContainerConnectException {
+
+		try{
+			if (form == null)
+				form = manager.getSearchForm(ecfConnection.getXMPPConnection(),
+						SERVICE_SEARCH + ecfConnection.getXMPPConnection().getServiceName());
+	
+			Set fields = new HashSet();
+			Iterator userProperties = form.getFields();
+	
+			while (userProperties.hasNext()) {
+				FormField field = (FormField) userProperties.next();
+				String variable = field.getVariable();
+				// ignore these fields
+				if (!variable.equalsIgnoreCase(FORM_TYPE)
+						&& !variable.equalsIgnoreCase(SEARCH_ACTION))
+					fields.add(variable);
+			}
+	
+			String[] array = (String[]) fields.toArray(new String[0]);
+			return array;
+		} catch (final XMPPException e) {
+			String message = null;
+			if (e.getXMPPError() != null && e.getXMPPError().getCode() == 404) {
+				message = Messages.XMPPContainer_UNRECOGONIZED_SEARCH_SERVICE;
+			} else
+				message = e.getLocalizedMessage();
+
+			throw new ContainerConnectException(message, e);
+		}
+
 	}
 
 }
