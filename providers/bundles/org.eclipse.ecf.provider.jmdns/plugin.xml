@@ -17,5 +17,11 @@
             description="JMDNS Namespace"
             name="ecf.namespace.jmdns"/>
    </extension>
+   <extension
+         point="org.eclipse.ecf.start">
+      <run
+            class="org.eclipse.ecf.internal.provider.jmdns.ECFStart">
+      </run>
+   </extension>
 
 </plugin>

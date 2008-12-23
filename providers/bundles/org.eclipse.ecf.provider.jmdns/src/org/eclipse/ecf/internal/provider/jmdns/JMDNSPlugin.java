@@ -10,15 +10,9 @@
  *****************************************************************************/
 package org.eclipse.ecf.internal.provider.jmdns;
 
-import java.net.InetAddress;
-import java.util.Properties;
 import org.eclipse.core.runtime.IAdapterManager;
-import org.eclipse.ecf.core.ContainerConnectException;
-import org.eclipse.ecf.core.identity.IDCreateException;
-import org.eclipse.ecf.core.identity.IDFactory;
-import org.eclipse.ecf.core.util.*;
-import org.eclipse.ecf.discovery.service.IDiscoveryService;
-import org.eclipse.ecf.provider.jmdns.container.JMDNSDiscoveryContainer;
+import org.eclipse.ecf.core.util.PlatformHelper;
+import org.eclipse.ecf.core.util.SystemLogService;
 import org.osgi.framework.*;
 import org.osgi.service.log.LogService;
 import org.osgi.util.tracker.ServiceTracker;
@@ -27,16 +21,12 @@ import org.osgi.util.tracker.ServiceTracker;
  * The main plugin class to be used in the desktop.
  */
 public class JMDNSPlugin implements BundleActivator {
-	private static final String NAME = "ecf.discovery.jmdns"; //$NON-NLS-1$
-
 	// The shared instance.
 	private static JMDNSPlugin plugin;
 
 	private BundleContext context = null;
 
 	public static final String PLUGIN_ID = "org.eclipse.ecf.provider.jmdns"; //$NON-NLS-1$
-
-	protected static InetAddress LOCALHOST = null;
 
 	/**
 	 * The constructor.
@@ -73,42 +63,6 @@ public class JMDNSPlugin implements BundleActivator {
 	 */
 	public void start(BundleContext ctxt) throws Exception {
 		this.context = ctxt;
-		LOCALHOST = InetAddress.getLocalHost();
-
-		Properties props = new Properties();
-		props.put(IDiscoveryService.CONTAINER_ID, IDFactory.getDefault().createStringID("org.eclipse.ecf.provider.jmdns.container.JMDNSDiscoveryContainer")); //$NON-NLS-1$
-		props.put(IDiscoveryService.CONTAINER_NAME, NAME);
-		props.put(Constants.SERVICE_RANKING, new Integer(750));
-		context.registerService(IDiscoveryService.class.getName(), new ServiceFactory() {
-			private volatile JMDNSDiscoveryContainer jdc;
-
-			/* (non-Javadoc)
-			 * @see org.osgi.framework.ServiceFactory#getService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration)
-			 */
-			public Object getService(Bundle bundle, ServiceRegistration registration) {
-				if (jdc == null) {
-					try {
-						jdc = new JMDNSDiscoveryContainer(LOCALHOST);
-						jdc.connect(null, null);
-					} catch (IDCreateException e) {
-						Trace.catching(JMDNSPlugin.PLUGIN_ID, JMDNSPlugin.PLUGIN_ID + "/debug/methods/catching", this.getClass(), "getService(Bundle, ServiceRegistration)", e); //$NON-NLS-1$ //$NON-NLS-2$
-					} catch (ContainerConnectException e) {
-						Trace.catching(JMDNSPlugin.PLUGIN_ID, JMDNSPlugin.PLUGIN_ID + "/debug/methods/catching", this.getClass(), "getService(Bundle, ServiceRegistration)", e); //$NON-NLS-1$ //$NON-NLS-2$
-						jdc = null;
-					}
-				}
-				return jdc;
-			}
-
-			/* (non-Javadoc)
-			 * @see org.osgi.framework.ServiceFactory#ungetService(org.osgi.framework.Bundle, org.osgi.framework.ServiceRegistration, java.lang.Object)
-			 */
-			public void ungetService(Bundle bundle, ServiceRegistration registration, Object service) {
-				//TODO-mkuppe we later might want to dispose jSLP when the last!!! consumer ungets the service 
-				//Though don't forget about the (ECF) Container which might still be in use
-			}
-		}, props);
-
 	}
 
 	protected Bundle getBundle() {
@@ -143,6 +97,10 @@ public class JMDNSPlugin implements BundleActivator {
 	 */
 	public synchronized static JMDNSPlugin getDefault() {
 		return plugin;
+	}
+
+	public BundleContext getContext() {
+		return context;
 	}
 
 	/**
