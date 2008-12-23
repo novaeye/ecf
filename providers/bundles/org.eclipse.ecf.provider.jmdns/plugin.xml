@@ -20,6 +20,7 @@
    <extension
          point="org.eclipse.ecf.start">
       <run
+            asynchronous="false"
             class="org.eclipse.ecf.internal.provider.jmdns.ECFStart">
       </run>
    </extension>
