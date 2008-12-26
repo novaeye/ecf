@@ -12,17 +12,41 @@ package org.eclipse.ecf.internal.provider.xmpp.search;
 import org.eclipse.ecf.core.user.IUser;
 import org.eclipse.ecf.presence.search.IResult;
 
+/**
+ * Implement a specific result for XMPP
+ *
+ */
 public class XMPPResultItem implements IResult {
 
-	IUser user;
-	
-	public XMPPResultItem(IUser user){
+	/** contain a IUser */
+	protected IUser user;
+
+	/**
+	 * Create a XMPP result with a IUser
+	 * @param user IUser
+	 */
+	public XMPPResultItem(IUser user) {
 		this.user = user;
 	}
-	
-	
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ecf.presence.search.IResult#getUser()
+	 */
 	public IUser getUser() {
 		return user;
+	}
+
+	/**
+	 * Verify if there is the same IUser. Compare using ID
+	 */
+	public boolean equals(Object o) {
+		return ((XMPPResultItem) o).getUser().getID().toString().equals(user.getID().toString());
+	}
+
+	public int hashCode() {
+		return (user.getID().toString() != null ? user.getID().toString()
+				.hashCode() : 0);
 	}
 
 }
