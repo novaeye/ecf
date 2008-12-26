@@ -9,8 +9,7 @@
  ******************************************************************************/
 package org.eclipse.ecf.internal.provider.xmpp.search;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -19,9 +18,8 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.ecf.core.ContainerConnectException;
 import org.eclipse.ecf.core.identity.ID;
-import org.eclipse.ecf.core.identity.IDCreateException;
-import org.eclipse.ecf.core.identity.IDFactory;
 import org.eclipse.ecf.core.identity.Namespace;
+import org.eclipse.ecf.core.user.IUser;
 import org.eclipse.ecf.core.user.User;
 import org.eclipse.ecf.internal.provider.xmpp.Messages;
 import org.eclipse.ecf.internal.provider.xmpp.smack.ECFConnection;
@@ -33,6 +31,7 @@ import org.eclipse.ecf.presence.search.ISelection;
 import org.eclipse.ecf.presence.search.IUserSearchListener;
 import org.eclipse.ecf.presence.search.IUserSearchManager;
 import org.eclipse.ecf.presence.search.ResultList;
+import org.eclipse.ecf.provider.xmpp.identity.XMPPID;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smackx.Form;
 import org.jivesoftware.smackx.FormField;
@@ -52,15 +51,15 @@ public class XMPPSearchManager implements IUserSearchManager {
 	protected static final String SERVICE_SEARCH = "search.";
 
 	/** Wrapper for XMPP connection */
-	ECFConnection ecfConnection;
+	protected ECFConnection ecfConnection;
 
-	Namespace connectNamespace;
+	protected Namespace connectNamespace;
 
-	ID connectedID;
+	protected ID connectedID;
 
-	Form form;
+	protected Form form;
 
-	UserSearch manager;
+	protected UserSearch manager;
 
 	protected static final String FORM_TYPE = "FORM_TYPE";
 
@@ -95,8 +94,9 @@ public class XMPPSearchManager implements IUserSearchManager {
 	 */
 	public ISearch search(ICriteria criteria) throws ContainerConnectException {
 
+		ResultList resultList = new ResultList();
 		try {
-
+			//initialize the form by chance it is null
 			if (form == null)
 				form = manager.getSearchForm(ecfConnection.getXMPPConnection(),
 						SERVICE_SEARCH
@@ -108,47 +108,41 @@ public class XMPPSearchManager implements IUserSearchManager {
 			 * the search.
 			 */
 			List criterions = criteria.getCriterions();
-			Form answerForm = form.createAnswerForm();
 			// add the fields for the search dynamically
 			// consider just the fields used on the search
+			// fields checked by user
+			
 			String fields[] = getUserPropertiesFields();
-
-			// type of action
-			// TODO make it better
-			Iterator it = criterions.iterator();
-			while (it.hasNext()) {
-				ICriterion criterion = (ICriterion) it.next();
-				if (criterion.equals(SEARCH_ACTION)) {
-					answerForm.setAnswer(SEARCH_ACTION, criterion
-							.toExpression());
-				}
-
-				for (int i = 0; i < fields.length; i++) {
-					String fieldName = fields[i];
-					if (criterion.equals(fieldName)) {
-						answerForm.setAnswer(fieldName, Boolean.valueOf(
-								criterion.toExpression()).booleanValue());
-						break;
+			for (int i = 0; i < fields.length; i++) {
+				Iterator criterionsIterator = criterions.iterator();
+				//for each user properties field check if it
+				//was added by user for the criteria
+				//for each field, a search is performed, and 
+				//the partial result is added to the result list
+				while (criterionsIterator.hasNext()) {
+					ICriterion criterion = (ICriterion) criterionsIterator.next();
+					if(criterion.equals(fields[i])){
+						Form answerForm = form.createAnswerForm();
+						answerForm.setAnswer(fields[i], true);
+						answerForm.setAnswer(SEARCH_ACTION, criterion.toExpression());
+						ReportedData data = manager.sendSearchForm(ecfConnection
+								.getXMPPConnection(), answerForm, SERVICE_SEARCH + ecfConnection.getXMPPConnection().getServiceName());
+						// create a result list from ReportedData
+						IResultList partialResultList = createResultList(data);
+						resultList.addAll(partialResultList.geResults());
 					}
 				}
-			}
+			}			
 
-			ReportedData data = manager.sendSearchForm(ecfConnection
-					.getXMPPConnection(), answerForm, SERVICE_SEARCH + ecfConnection.getXMPPConnection().getServiceName());
-
-			// create a result list from ReportedData
-			IResultList resultList = createResultList(data);
-
-			ISearch search = new XMPPSearch(resultList);
-
-			return search;
+			return new XMPPSearch(resultList);
+			
 		} catch (final XMPPException e) {
 			String message = null;
 			if (e.getXMPPError() != null && e.getXMPPError().getCode() == 404) {
 				message = Messages.XMPPContainer_UNRECOGONIZED_SEARCH_SERVICE;
-			} else
+			} else{
 				message = e.getLocalizedMessage();
-
+			}
 			throw new ContainerConnectException(message, e);
 		}
 
@@ -158,17 +152,15 @@ public class XMPPSearchManager implements IUserSearchManager {
 	 * Create a result list from ReportedData. Identify dynamically columns and
 	 * rows and create users adding it to a {@link IResultList}
 	 * 
-	 * @param data
+	 * @param data ReportedData
 	 * @return {@link IResultList} a list of users
+	 * @throws  
 	 */
 	protected IResultList createResultList(ReportedData data) {
-
-		Collection users = new ArrayList(5);
-
+		ResultList result = new ResultList();
 		Iterator rows = data.getRows();
 		while (rows.hasNext()) {
 			Row row = (Row) rows.next();
-
 			Iterator jids = row.getValues(JID);
 			Iterator names = row.getValues(NAME);
 			String jid = null;
@@ -177,20 +169,16 @@ public class XMPPSearchManager implements IUserSearchManager {
 			while (jids.hasNext() && names.hasNext()) {
 				try {
 					jid = (String) jids.next();
-					name = (String) names.next();
-					users.add(new XMPPResultItem(
-							new User(IDFactory.getDefault().createID(
-									connectNamespace, jid), name)));
-				} catch (final IDCreateException e) {
+					name = (String) names.next();					
+					IUser user = new User(new XMPPID(connectNamespace, jid), name);
+					result.add(new XMPPResultItem(user));
+				} catch(URISyntaxException e){
 					throw new RuntimeException(
 							"cannot create connect id for client " + jid
 									+ " , name = " + name, e);
 				}
 			}
 		}
-
-		ResultList result = new ResultList(users);
-
 		return result;
 	}
 
@@ -215,11 +203,9 @@ public class XMPPSearchManager implements IUserSearchManager {
 		Assert.isNotNull(connectNamespace);
 		Assert.isNotNull(connectedID);
 		Assert.isNotNull(connection);
-
 		this.connectNamespace = connectNamespace;
 		this.connectedID = connectedID;
 		this.ecfConnection = connection;
-
 	}
 
 	/**
@@ -230,7 +216,6 @@ public class XMPPSearchManager implements IUserSearchManager {
 	 * @throws ContainerConnectException 
 	 */
 	public String[] getUserPropertiesFields() throws ContainerConnectException {
-
 		try{
 			if (form == null)
 				form = manager.getSearchForm(ecfConnection.getXMPPConnection(),
@@ -238,7 +223,6 @@ public class XMPPSearchManager implements IUserSearchManager {
 	
 			Set fields = new HashSet();
 			Iterator userProperties = form.getFields();
-	
 			while (userProperties.hasNext()) {
 				FormField field = (FormField) userProperties.next();
 				String variable = field.getVariable();
@@ -247,16 +231,14 @@ public class XMPPSearchManager implements IUserSearchManager {
 						&& !variable.equalsIgnoreCase(SEARCH_ACTION))
 					fields.add(variable);
 			}
-	
-			String[] array = (String[]) fields.toArray(new String[0]);
-			return array;
+			return (String[]) fields.toArray(new String[0]);
 		} catch (final XMPPException e) {
 			String message = null;
 			if (e.getXMPPError() != null && e.getXMPPError().getCode() == 404) {
 				message = Messages.XMPPContainer_UNRECOGONIZED_SEARCH_SERVICE;
-			} else
+			} else{
 				message = e.getLocalizedMessage();
-
+			}
 			throw new ContainerConnectException(message, e);
 		}
 
