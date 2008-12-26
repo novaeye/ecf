@@ -11,29 +11,62 @@ package org.eclipse.ecf.internal.provider.xmpp.search;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.ecf.presence.search.ICriteria;
 import org.eclipse.ecf.presence.search.ICriterion;
 
+/**
+ * Implement a specific criteria control for XMPP
+ *
+ */
 public class XMPPCriteria implements ICriteria {
 
+	/** criteria list */
 	protected List criteria;
 	
+	/**
+	 * Create a criteria with a sync list
+	 */
 	public XMPPCriteria(){
 		criteria = Collections.synchronizedList(new ArrayList());
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ecf.presence.search.ICriteria#add(org.eclipse.ecf.presence.search.ICriterion)
+	 */
 	public void add(ICriterion criterion) {
 		criteria.add(criterion);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ecf.presence.search.ICriteria#getCriterions()
+	 */
 	public List getCriterions() {
 		return criteria;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ecf.presence.search.ICriteria#isEmpty()
+	 */
 	public boolean isEmpty() {
 		return criteria.isEmpty();
+	}
+	
+	public String toString() {
+		StringBuffer sb = new StringBuffer("XMPPCriteria["); //$NON-NLS-1$
+		Iterator it = criteria.iterator();
+		while (it.hasNext()) {
+			sb.append("[");//$NON-NLS-1$
+			ICriterion criterion = (ICriterion) it.next();
+			sb.append(criterion.toString());
+			sb.append("];");//$NON-NLS-1$
+		}
+		return sb.toString();
 	}
 
 }
