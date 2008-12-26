@@ -11,6 +11,10 @@ package org.eclipse.ecf.internal.provider.xmpp.search;
 
 import org.eclipse.ecf.presence.search.SimpleCriterion;
 
+/**
+ * Implement specific for ICriterion
+ *
+ */
 public class XMPPSimpleCriterion extends SimpleCriterion {
 
 	public XMPPSimpleCriterion(String field, String value, String operator,
@@ -19,12 +23,13 @@ public class XMPPSimpleCriterion extends SimpleCriterion {
 
 	}
 
-
 	public XMPPSimpleCriterion(String field, String value, String operator) {
 		super(field, value, operator);
 	}
 	
-
+	/**
+	 * Provide the expression compose just for the value
+	 */
 	public String toExpression() {
 		return value;
 	}

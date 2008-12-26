@@ -12,15 +12,23 @@ package org.eclipse.ecf.internal.provider.xmpp.search;
 import org.eclipse.ecf.presence.search.IResultList;
 import org.eclipse.ecf.presence.search.ISearch;
 
+/**
+ * Implement ISearch for XMPP
+ *
+ */
 public class XMPPSearch implements ISearch {
 
-	private IResultList resultList;
+	protected IResultList resultList;
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.ecf.presence.search.ISearch#getResultList()
+	 */
 	public IResultList getResultList() {
 		return resultList;
 	}
 
-	XMPPSearch(IResultList resultList) {
+	protected XMPPSearch(IResultList resultList) {
 		this.resultList = resultList;
 	}
 	

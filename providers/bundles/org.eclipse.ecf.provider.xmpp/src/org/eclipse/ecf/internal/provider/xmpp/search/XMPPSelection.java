@@ -12,6 +12,10 @@ package org.eclipse.ecf.internal.provider.xmpp.search;
 import org.eclipse.ecf.presence.search.ICriterion;
 import org.eclipse.ecf.presence.search.Selection;
 
+/**
+ * Implement a specific Selection for XMPP
+ *
+ */
 public class XMPPSelection extends Selection {
 
 	/*
@@ -19,6 +23,7 @@ public class XMPPSelection extends Selection {
 	 * @see org.eclipse.ecf.presence.search.ISelection#eq(java.lang.String, java.lang.String)
 	 */
 	public ICriterion eq(String field, String value) {
+		//the operator is ignored for XMPP
 		return new XMPPSimpleCriterion(field, value, "");
 	}
 	
@@ -27,6 +32,7 @@ public class XMPPSelection extends Selection {
 	 * @see org.eclipse.ecf.presence.search.ISelection#eq(java.lang.String, java.lang.String)
 	 */
 	public ICriterion eq(String field, String value, boolean ignoreCase) {
+		//the operator is ignored for XMPP
 		return new XMPPSimpleCriterion(field, value, "");
 	}
 	
