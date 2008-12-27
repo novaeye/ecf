@@ -243,5 +243,12 @@ public class XMPPSearchManager implements IUserSearchManager {
 		}
 
 	}
+	
+	/**
+	 * Notify that user search for XMPP is enabled
+	 */
+	public boolean isEnabled() {
+		return true;
+	}
 
 }
