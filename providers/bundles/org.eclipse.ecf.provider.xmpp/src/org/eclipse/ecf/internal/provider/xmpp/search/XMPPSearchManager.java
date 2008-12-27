@@ -61,6 +61,8 @@ public class XMPPSearchManager implements IUserSearchManager {
 
 	protected UserSearch manager;
 
+	protected boolean enabled;
+
 	protected static final String FORM_TYPE = "FORM_TYPE";
 
 	protected static final String NAME = "name";
@@ -69,10 +71,11 @@ public class XMPPSearchManager implements IUserSearchManager {
 
 	protected static final String SEARCH_ACTION = "search";
 
-	
+
 	public XMPPSearchManager() {
 		manager = new UserSearch();
 	}
+	
 	/**
 	 * Create a specific {@link ICriteria} for XMPP
 	 */
@@ -248,7 +251,15 @@ public class XMPPSearchManager implements IUserSearchManager {
 	 * Notify that user search for XMPP is enabled
 	 */
 	public boolean isEnabled() {
-		return true;
+		return this.enabled;
+	}
+	
+	/**
+	 * For gtalk it should be not enabled
+	 * @param enabled
+	 */
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
 	}
 
 }

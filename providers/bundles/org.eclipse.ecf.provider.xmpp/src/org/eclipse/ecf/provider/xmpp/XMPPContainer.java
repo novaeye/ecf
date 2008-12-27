@@ -248,6 +248,7 @@ public class XMPPContainer extends ClientSOContainer implements IPresenceService
 			accountManager.setConnection(conn.getXMPPConnection());
 			chatRoomManager.setConnection(getConnectNamespace(), originalTarget, conn);
 			searchManager.setConnection(getConnectNamespace(), originalTarget,conn);
+			searchManager.setEnabled(!isGoogle(originalTarget));
 			presenceHelper.setUser(new User(originalTarget));
 			outgoingFileTransferContainerAdapter.setConnection(conn.getXMPPConnection());
 			return originalTarget;
