@@ -23,6 +23,7 @@ import org.eclipse.ecf.core.user.IUser;
 import org.eclipse.ecf.core.user.User;
 import org.eclipse.ecf.internal.provider.xmpp.Messages;
 import org.eclipse.ecf.internal.provider.xmpp.smack.ECFConnection;
+import org.eclipse.ecf.presence.search.AbstractUserSearchManager;
 import org.eclipse.ecf.presence.search.ICriteria;
 import org.eclipse.ecf.presence.search.ICriterion;
 import org.eclipse.ecf.presence.search.IResultList;
@@ -45,7 +46,7 @@ import org.jivesoftware.smackx.search.UserSearch;
  * 
  * @see IUserSearchManager
  */
-public class XMPPSearchManager implements IUserSearchManager {
+public class XMPPSearchManager extends AbstractUserSearchManager {
 
 	/** Search service name on XMPP server */
 	protected static final String SERVICE_SEARCH = "search.";
@@ -190,8 +191,8 @@ public class XMPPSearchManager implements IUserSearchManager {
 	 * 
 	 * @see IUserSearchManager#search(ICriteria).
 	 */
-	public void search(ICriteria criteria, IUserSearchListener listener) {
-
+	public void search(IUserSearchListener listener) {
+		addListener(listener);
 	}
 
 	/**
