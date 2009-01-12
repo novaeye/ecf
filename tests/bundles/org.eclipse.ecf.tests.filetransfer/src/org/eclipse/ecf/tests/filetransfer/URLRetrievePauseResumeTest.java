@@ -30,7 +30,8 @@ import org.eclipse.ecf.tests.ContainerAbstractTestCase;
 
 public class URLRetrievePauseResumeTest extends ContainerAbstractTestCase {
 
-	private static final String HTTP_RETRIEVE = "http://ftp.osuosl.org/pub/eclipse/technology/ecf/org.eclipse.ecf.examples-1.0.3.v20070927-1821.zip";
+	private static final String HTTP_RETRIEVE = "http://www.eclipse.org/ecf/ip_log.html";
+	protected static final String HTTPS_RETRIEVE = "https://www.verisign.com";
 
 	private static final String FILENAME = "foo.zip";
 
