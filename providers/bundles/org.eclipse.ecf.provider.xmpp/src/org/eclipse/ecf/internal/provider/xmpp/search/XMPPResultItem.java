@@ -41,12 +41,20 @@ public class XMPPResultItem implements IResult {
 	 * Verify if there is the same IUser. Compare using ID
 	 */
 	public boolean equals(Object o) {
-		return ((XMPPResultItem) o).getUser().getID().toString().equals(user.getID().toString());
+		if(o instanceof XMPPResultItem)
+			return ((XMPPResultItem) o).getUser().getID().toString().equals(user.getID().toString());
+		else
+			return false;
 	}
 
 	public int hashCode() {
 		return (user.getID().toString() != null ? user.getID().toString()
 				.hashCode() : 0);
+	}
+
+	public Object getAdapter(Class adapter) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
