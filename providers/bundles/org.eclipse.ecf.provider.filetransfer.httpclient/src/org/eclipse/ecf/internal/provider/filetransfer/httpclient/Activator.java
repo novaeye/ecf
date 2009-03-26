@@ -11,6 +11,7 @@
 package org.eclipse.ecf.internal.provider.filetransfer.httpclient;
 
 import javax.net.ssl.SSLSocketFactory;
+
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ecf.core.util.LogHelper;

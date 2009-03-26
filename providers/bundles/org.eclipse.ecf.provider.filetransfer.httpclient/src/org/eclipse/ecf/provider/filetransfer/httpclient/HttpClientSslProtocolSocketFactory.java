@@ -12,9 +12,19 @@
 package org.eclipse.ecf.provider.filetransfer.httpclient;
 
 import java.io.IOException;
-import java.net.*;
-import javax.net.ssl.*;
-import org.apache.commons.httpclient.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+
+import org.apache.commons.httpclient.ConnectTimeoutException;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.ProxyClient;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
