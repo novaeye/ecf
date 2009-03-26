@@ -17,12 +17,14 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileInfo;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.ecf.core.util.Proxy;
 import org.eclipse.ecf.filetransfer.IRemoteFile;
 import org.eclipse.ecf.filetransfer.IRemoteFileSystemListener;
 import org.eclipse.ecf.filetransfer.RemoteFileSystemException;
 import org.eclipse.ecf.filetransfer.identity.FileIDFactory;
 import org.eclipse.ecf.filetransfer.identity.IFileID;
 import org.eclipse.ecf.provider.filetransfer.browse.AbstractFileSystemBrowser;
+
 
 /**
  *
