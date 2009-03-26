@@ -12,10 +12,8 @@
 package org.eclipse.ecf.internal.provider.filetransfer.ssl;
 
 import java.net.URLConnection;
-
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
-
 import org.eclipse.ecf.internal.provider.filetransfer.IURLConnectionModifier;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
