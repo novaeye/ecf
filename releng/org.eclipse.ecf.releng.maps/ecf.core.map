@@ -68,5 +68,5 @@ plugin@org.eclipse.ecf.examples.remoteservices.server=@CVSTag@,:pserver:anonymou
 plugin@org.eclipse.ecf.examples.updatesite.server=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/server-side/examples/bundles/org.eclipse.ecf.examples.updatesite.server
 plugin@org.eclipse.ecf.examples.updatesite.client=@CVSTag@,:pserver:anonymous@dev.eclipse.org:/cvsroot/rt,,org.eclipse.ecf/server-side/examples/bundles/org.eclipse.ecf.examples.updatesite.client
 
-plugin@org.objectweb.asm,3.1.0=GET,http://download.eclipse.org/tools/orbit/downloads/drops/S20090426201227/bundles/org.objectweb.asm_3.1.0.v200803061910.jar
-plugin@org.objectweb.asm.source,3.1.0=GET,http://download.eclipse.org/tools/orbit/downloads/drops/S20090426201227/bundles/org.objectweb.asm.source_3.1.0.v200803061910.jar
+plugin@org.objectweb.asm,3.1.0=GET,http://download.eclipse.org/tools/orbit/downloads/drops/R20090529135407/bundles/org.objectweb.asm_3.1.0.v200803061910.jar
+plugin@org.objectweb.asm.source,3.1.0=GET,http://download.eclipse.org/tools/orbit/downloads/drops/R20090529135407/bundles/org.objectweb.asm.source_3.1.0.v200803061910.jar
