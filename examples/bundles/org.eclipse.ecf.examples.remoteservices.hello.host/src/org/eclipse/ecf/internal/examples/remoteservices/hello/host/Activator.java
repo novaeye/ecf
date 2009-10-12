@@ -1,3 +1,13 @@
+/****************************************************************************
+ * Copyright (c) 2009 Composent, Inc. and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Composent, Inc. - initial API and implementation
+ *****************************************************************************/
 package org.eclipse.ecf.internal.examples.remoteservices.hello.host;
 
 import java.util.Properties;
@@ -14,6 +24,7 @@ import org.osgi.util.tracker.ServiceTracker;
 
 public class Activator implements BundleActivator, IDistributionConstants {
 
+	private String containerType = System.getProperty("containerType","ecf.r_osgi.peer");
 	private BundleContext context;
 	private ServiceTracker containerManagerServiceTracker;
 	private ServiceRegistration helloRegistration;
@@ -26,7 +37,7 @@ public class Activator implements BundleActivator, IDistributionConstants {
 		this.context = context;
 		// Create R-OSGi Container
 		IContainerManager containerManager = getContainerManagerService();
-		containerManager.getContainerFactory().createContainer("ecf.r_osgi.peer");
+		containerManager.getContainerFactory().createContainer(containerType);
 		
 		Properties props = new Properties();
 		// add OSGi service property indicating this
