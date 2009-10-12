@@ -1,3 +1,13 @@
+/****************************************************************************
+ * Copyright (c) 2009 Composent, Inc. and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Composent, Inc. - initial API and implementation
+ *****************************************************************************/
 package org.eclipse.ecf.internal.examples.remoteservices.hello.consumer;
 
 import org.eclipse.ecf.core.IContainerManager;
@@ -18,6 +28,7 @@ public class Activator implements BundleActivator, IDistributionConstants, Servi
 
 	public static final String CONSUMER_NAME = "org.eclipse.ecf.examples.remoteservices.hello.consumer";
 	
+	private String containerType = System.getProperty("containerType","ecf.r_osgi.peer");
 	private BundleContext context;
 	private ServiceTracker containerManagerServiceTracker;
 	private ServiceTracker helloServiceTracker;
@@ -30,7 +41,7 @@ public class Activator implements BundleActivator, IDistributionConstants, Servi
 		this.context = context;
 		// Create R-OSGi Container
 		IContainerManager containerManager = getContainerManagerService();
-		containerManager.getContainerFactory().createContainer("ecf.r_osgi.peer");
+		containerManager.getContainerFactory().createContainer(containerType);
 		// Create service tracker to track IHello instances that are REMOTE
 		helloServiceTracker = new ServiceTracker(context,createRemoteFilter(),this);
 		helloServiceTracker.open();
