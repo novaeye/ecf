@@ -60,10 +60,14 @@
 
 	<!-- swtbot -->
 	<searchPath name="org.eclipse.swtbot">
-		<provider readerType="eclipse.import" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="false" source="false">
-			<uri format="http://rsync.osuosl.org/pub/eclipse/technology/swtbot/galileo/dev-build/update-site/?importType=binary"/>
+		<provider readerType="p2" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="false" source="false">
+			<uri format="http://download.eclipse.org/technology/swtbot/galileo/dev-build/update-site/?importType=binary"/>
+		</provider>
+		<provider readerType="p2" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="false" source="false">
+			<uri format="http://download.eclipse.org/technology/swtbot/helios/dev-build/update-site/?importType=binary"/>
 		</provider>
 	</searchPath>
+
 
 	<!-- default -->
 	<searchPath name="default">
