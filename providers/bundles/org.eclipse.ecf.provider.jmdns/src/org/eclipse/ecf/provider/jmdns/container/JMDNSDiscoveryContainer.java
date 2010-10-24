@@ -10,6 +10,8 @@
  *****************************************************************************/
 package org.eclipse.ecf.provider.jmdns.container;
 
+import java.io.IOException;
+
 import java.io.*;
 import java.net.URI;
 import java.util.*;
@@ -102,7 +104,11 @@ public class JMDNSDiscoveryContainer extends AbstractDiscoveryContainerAdapter i
 			} catch (final IOException e) {
 				Trace.catching(JMDNSPlugin.PLUGIN_ID, JMDNSDebugOptions.EXCEPTIONS_CATCHING, this.getClass(), "connect", e); //$NON-NLS-1$
 				if (this.jmdns != null) {
-					jmdns.close();
+					try {
+						jmdns.close();
+					} catch (IOException e1) {
+						Trace.catching(JMDNSPlugin.PLUGIN_ID, JMDNSDebugOptions.EXCEPTIONS_CATCHING, this.getClass(), "connect", e1); //$NON-NLS-1$
+					}
 					jmdns = null;
 				}
 				throw new ContainerConnectException("Cannot create JmDNS instance", e); //$NON-NLS-1$
@@ -150,7 +156,11 @@ public class JMDNSDiscoveryContainer extends AbstractDiscoveryContainerAdapter i
 			notificationThread = null;
 			this.targetID = null;
 			serviceTypes.clear();
-			jmdns.close();
+			try {
+				jmdns.close();
+			} catch (IOException e) {
+				Trace.catching(JMDNSPlugin.PLUGIN_ID, JMDNSDebugOptions.EXCEPTIONS_CATCHING, this.getClass(), "disconnect", e); //$NON-NLS-1$
+			}
 			jmdns = null;
 			fireContainerEvent(new ContainerDisconnectedEvent(this.getID(), connectedID));
 		}

@@ -11,12 +11,12 @@ Require-Bundle: org.eclipse.equinox.common,
  org.eclipse.ecf.discovery
 Eclipse-LazyStart: true
 Bundle-ClassPath: .
-Bundle-RequiredExecutionEnvironment: CDC-1.1/Foundation-1.1,
- J2SE-1.4
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: org.eclipse.ecf.internal.provider.jmdns;x-internal:=true,
  org.eclipse.ecf.provider.jmdns.container,
  org.eclipse.ecf.provider.jmdns.identity
 Import-Package: javax.jmdns;version="3.2.2",
+ org.eclipse.equinox.concurrent.future;version="1.0.0",
  org.osgi.framework;version="1.3.0",
  org.osgi.service.log;version="1.3.0",
  org.osgi.util.tracker;version="1.3.2"
