@@ -55,6 +55,13 @@
 		</provider>
 	</searchPath>
 
+	<!-- javax.jmdns -->
+	<searchPath name="javax.jmdns">
+		<provider readerType="url" componentTypes="osgi.bundle" mutable="false" source="false">
+			<uri format="http://download.ecf-project.org/repo/UPSTREAM-C-HEAD-jmdns/lastSuccessful/javax.jmdns$jmdns/archive/javax.jmdns/jmdns/3.2.2-SNAPSHOT/jmdns-3.2.2-SNAPSHOT.jar"/>
+		</provider>
+	</searchPath>
+	
 	<!-- pluginbuilder -->
 	<searchPath name="org.pluginbuilder">
 		<provider readerType="p2" componentTypes="osgi.bundle,eclipse.feature,buckminster" mutable="false" source="false">
@@ -98,6 +105,8 @@
 	<!-- below order does matter!!! -->
 	
 	<locator searchPathRef="org.xbill.dns" pattern="^org\.xbill\.dns$" />
+	
+	<locator searchPathRef="javax.jmdns" pattern="^javax\.jmdns$" />
 	
 	<!-- ECF -->
 	<locator searchPathRef="org.eclipse.ecf" pattern="^ch\.ethz\.iks(\..+)?" />
