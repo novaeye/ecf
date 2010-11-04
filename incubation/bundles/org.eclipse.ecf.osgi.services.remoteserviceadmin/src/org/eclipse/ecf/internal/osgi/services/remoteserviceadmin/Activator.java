@@ -1,13 +1,26 @@
+/*******************************************************************************
+ * Copyright (c) 2010 Composent, Inc. and others. All rights reserved. This
+ * program and the accompanying materials are made available under the terms of
+ * the Eclipse Public License v1.0 which accompanies this distribution, and is
+ * available at http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *   Composent, Inc. - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.ecf.internal.osgi.services.remoteserviceadmin;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
+
+import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -50,24 +63,10 @@ public class Activator implements BundleActivator {
 		return instance;
 	}
 
-	private AbstractServiceInfoFactory serviceInfoFactory;
-	private ServiceRegistration serviceInfoFactoryRegistration;
-	
-	private AbstractEndpointDescriptionFactory endpointDescriptionFactory;
-	private ServiceRegistration endpointDescriptionFactoryRegistration;
-	
 	private IExecutor executor;
-
-	private LocatorServiceListener locatorServiceListener;
+	
 	private ServiceTracker locatorServiceTracker;
-
-	private ServiceTracker endpointListenerServiceTracker;
-	private Object endpointListenerServiceTrackerLock = new Object();
-
-	private ServiceTracker logServiceTracker = null;
-	private LogService logService = null;
-	private Object logServiceTrackerLock = new Object();
-
+	private Map<IDiscoveryLocator, LocatorServiceListener> locatorListeners;
 
 	/*
 	 * (non-Javadoc)
@@ -79,28 +78,24 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
 		Activator.instance = this;
-		// For the service info factory and the endpointdescription factory
-		// registration, set the service ranking property to Integer.MIN_VALUE so 
-		// that any other registered factories will be preferred.
-		final Properties properties = new Properties();
-		properties.put(Constants.SERVICE_RANKING, new Integer(
-				Integer.MIN_VALUE));
-		serviceInfoFactory = new DefaultServiceInfoFactory();
-		serviceInfoFactoryRegistration = context.registerService(IServiceInfoFactory.class.getName(), serviceInfoFactory, properties);
-		// also endpoint description factory
-		endpointDescriptionFactory = new DefaultEndpointDescriptionFactory();
-		endpointDescriptionFactoryRegistration = context.registerService(IEndpointDescriptionFactory.class.getName(), endpointDescriptionFactory, properties);
+		startServiceInfoFactory();
+		startEndpointDescriptionFactory();
+		startExecutor();
+		startLocators();
+	}
 
-		executor = new ThreadsExecutor();
-		
-		// Create service listener
-		locatorServiceListener = new LocatorServiceListener();
+	private void startLocators() {
+		locatorListeners = new HashMap();
 		// Create locator service tracker
 		locatorServiceTracker = new ServiceTracker(context,
 				IDiscoveryLocator.class.getName(),
 				new LocatorTrackerCustomizer());
 		locatorServiceTracker.open();
 		openLocators();
+	}
+
+	private void startExecutor() {
+		executor = new ThreadsExecutor();
 	}
 
 	private void openLocators() {
@@ -116,17 +111,27 @@ public class Activator implements BundleActivator {
 	void openLocator(IDiscoveryLocator locator) {
 		if (locator == null || context == null)
 			return;
-		locator.addServiceListener(locatorServiceListener);
-		processInitialLocatorServices(locator);
+		synchronized (locatorListeners) {
+			LocatorServiceListener locatorListener = new LocatorServiceListener(
+					locator);
+			locatorListeners.put(locator, locatorListener);
+			processInitialLocatorServices(locator, locatorListener);
+		}
 	}
 
 	void shutdownLocator(IDiscoveryLocator locator) {
 		if (locator == null || context == null)
 			return;
-		locator.removeServiceListener(locatorServiceListener);
+		synchronized (locatorListeners) {
+			LocatorServiceListener locatorListener = locatorListeners
+					.remove(locator);
+			if (locatorListener != null)
+				locatorListener.close();
+		}
 	}
 
-	private void processInitialLocatorServices(final IDiscoveryLocator locator) {
+	private void processInitialLocatorServices(final IDiscoveryLocator locator,
+			final LocatorServiceListener locatorListener) {
 		IProgressRunnable runnable = new IProgressRunnable() {
 			public Object run(IProgressMonitor arg0) throws Exception {
 				if (context == null)
@@ -135,12 +140,26 @@ public class Activator implements BundleActivator {
 				if (context == null)
 					return null;
 				for (int i = 0; i < serviceInfos.length; i++) {
-					locatorServiceListener.handleService(serviceInfos[i], true);
+					locatorListener.handleService(serviceInfos[i], true);
 				}
 				return null;
 			}
 		};
 		executor.execute(runnable, null);
+	}
+
+	private void closeLocatorListeners() {
+		synchronized (locatorListeners) {
+			for (IDiscoveryLocator l : locatorListeners.keySet()) {
+				LocatorServiceListener locatorListener = locatorListeners
+						.get(l);
+				if (locatorListener != null) {
+					l.removeServiceListener(locatorListener);
+					locatorListener.close();
+				}
+			}
+			locatorListeners.clear();
+		}
 	}
 
 	void shutdownLocators() {
@@ -160,88 +179,48 @@ public class Activator implements BundleActivator {
 	 * org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
 	 */
 	public void stop(BundleContext bundleContext) throws Exception {
-		if (endpointDescriptionFactoryRegistration != null) {
-			endpointDescriptionFactoryRegistration.unregister();
-			endpointDescriptionFactoryRegistration = null;
+		closeEndpointDescriptionFactory();
+		closeServiceInfoFactory();
+		closeSAXParserTracker();
+		closeEndpointListenerTracker();
+		closeLogServiceTracker();
+		closeEndpointDescriptionFactoryTracker();
+		closeLocatorTracker();
+		closeLocatorListeners();
+		executor = null;
+		Activator.context = null;
+		Activator.instance = null;
+	}
+
+	private void closeLocatorTracker() {
+		if (locatorServiceTracker != null) {
+			locatorServiceTracker.close();
+			locatorServiceTracker = null;
 		}
-		if (endpointDescriptionFactory != null) {
-			endpointDescriptionFactory.close();
-			endpointDescriptionFactory = null;
-		}
-		
-		if (serviceInfoFactoryRegistration != null) {
-			serviceInfoFactoryRegistration.unregister();
-			serviceInfoFactoryRegistration = null;
-		}
-		if (serviceInfoFactory != null) {
-			serviceInfoFactory.close();
-			serviceInfoFactory = null;
-		}
-		
-		synchronized (endpointListenerServiceTrackerLock) {
-			if (endpointListenerServiceTracker != null) {
-				endpointListenerServiceTracker.close();
-				endpointListenerServiceTracker = null;
-			}
-		}
-		synchronized (logServiceTrackerLock) {
-			if (logServiceTracker != null) {
-				logServiceTracker.close();
-				logServiceTracker = null;
-				logService = null;
-			}
-		}
+	}
+
+	private void closeEndpointDescriptionFactoryTracker() {
 		synchronized (endpointDescriptionFactoryServiceTrackerLock) {
 			if (endpointDescriptionFactoryServiceTracker != null) {
 				endpointDescriptionFactoryServiceTracker.close();
 				endpointDescriptionFactoryServiceTracker = null;
 			}
 		}
-		if (locatorServiceTracker != null) {
-			locatorServiceTracker.close();
-			locatorServiceTracker = null;
-		}
-		locatorServiceListener.close();
-		executor = null;
-		Activator.context = null;
-		Activator.instance = null;
 	}
 
-	protected LogService getLogService() {
-		if (context == null)
-			return null;
-		synchronized (logServiceTrackerLock) {
-			if (logServiceTracker == null) {
-				logServiceTracker = new ServiceTracker(context,
-						LogService.class.getName(), null);
-				logServiceTracker.open();
+	private ServiceTracker endpointListenerServiceTracker;
+	private Object endpointListenerServiceTrackerLock = new Object();
+
+	private void closeEndpointListenerTracker() {
+		synchronized (endpointListenerServiceTrackerLock) {
+			if (endpointListenerServiceTracker != null) {
+				endpointListenerServiceTracker.close();
+				endpointListenerServiceTracker = null;
 			}
-			logService = (LogService) logServiceTracker.getService();
-			if (logService == null)
-				logService = new SystemLogService(PLUGIN_ID);
-			return logService;
 		}
 	}
 
-	public void log(IStatus status) {
-		if (logService == null)
-			logService = getLogService();
-		if (logService != null)
-			logService.log(null, LogHelper.getLogCode(status),
-					LogHelper.getLogMessage(status), status.getException());
-	}
 
-	public void log(ServiceReference sr, IStatus status) {
-		log(sr, LogHelper.getLogCode(status), LogHelper.getLogMessage(status),
-				status.getException());
-	}
-
-	public void log(ServiceReference sr, int level, String message, Throwable t) {
-		if (logService == null)
-			logService = getLogService();
-		if (logService != null)
-			logService.log(sr, level, message, t);
-	}
 
 	private class LocatorTrackerCustomizer implements ServiceTrackerCustomizer {
 
@@ -401,6 +380,163 @@ public class Activator implements BundleActivator {
 			}
 			return (IEndpointDescriptionFactory) endpointDescriptionFactoryServiceTracker
 					.getService();
+		}
+	}
+
+	public String getFrameworkUUID() {
+		if (context == null)
+			return null;
+		// code get and set the framework uuid property as specified in
+		// r2.enterprise.pdf pg 297
+		synchronized ("org.osgi.framework.uuid") {
+			String result = context.getProperty("org.osgi.framework.uuid");
+			if (result == null) {
+				UUID newUUID = UUID.randomUUID();
+				result = newUUID.toString();
+				System.setProperty("org.osgi.framework.uuid",
+						newUUID.toString());
+			}
+			return result;
+		}
+	}
+
+	// Sax parser
+	
+	private Object saxParserFactoryTrackerLock = new Object();
+	private ServiceTracker saxParserFactoryTracker;
+
+	public SAXParserFactory getSAXParserFactory() {
+		if (instance == null)
+			return null;
+		synchronized (saxParserFactoryTrackerLock) {
+			if (saxParserFactoryTracker == null) {
+				saxParserFactoryTracker = new ServiceTracker(context,
+						SAXParserFactory.class.getName(), null);
+				saxParserFactoryTracker.open();
+			}
+			return (SAXParserFactory) saxParserFactoryTracker.getService();
+		}
+	}
+
+	private void closeSAXParserTracker() {
+		synchronized (saxParserFactoryTrackerLock) {
+			if (saxParserFactoryTracker != null) {
+				saxParserFactoryTracker.close();
+				saxParserFactoryTracker = null;
+			}
+		}
+	}
+
+	
+	private AbstractServiceInfoFactory serviceInfoFactory;
+	private ServiceRegistration serviceInfoFactoryRegistration;
+
+	// ServiceInfo factory
+	private void startServiceInfoFactory() {
+		// For the service info factory 
+		// registration, set the service ranking property to Integer.MIN_VALUE
+		// so that any other registered factories will be preferred.
+		final Properties properties = new Properties();
+		properties.put(Constants.SERVICE_RANKING,
+				new Integer(Integer.MIN_VALUE));
+		serviceInfoFactory = new DefaultServiceInfoFactory();
+		serviceInfoFactoryRegistration = context.registerService(
+				IServiceInfoFactory.class.getName(), serviceInfoFactory,
+				(Dictionary) properties);
+	}
+
+	private void closeServiceInfoFactory() {
+		if (serviceInfoFactoryRegistration != null) {
+			serviceInfoFactoryRegistration.unregister();
+			serviceInfoFactoryRegistration = null;
+		}
+		if (serviceInfoFactory != null) {
+			serviceInfoFactory.close();
+			serviceInfoFactory = null;
+		}
+	}
+
+    // endpoint description factory
+	private AbstractEndpointDescriptionFactory endpointDescriptionFactory;
+	private ServiceRegistration endpointDescriptionFactoryRegistration;
+
+	private void startEndpointDescriptionFactory() {
+		// For the endpoint description factory 
+		// registration, set the service ranking property to Integer.MIN_VALUE
+		// so that any other registered factories will be preferred.
+		final Properties properties = new Properties();
+		properties.put(Constants.SERVICE_RANKING,
+				new Integer(Integer.MIN_VALUE));
+		endpointDescriptionFactory = new DefaultEndpointDescriptionFactory();
+		endpointDescriptionFactoryRegistration = context.registerService(
+				IEndpointDescriptionFactory.class.getName(),
+				endpointDescriptionFactory, (Dictionary) properties);
+	}
+
+	private void closeEndpointDescriptionFactory() {
+		if (endpointDescriptionFactoryRegistration != null) {
+			endpointDescriptionFactoryRegistration.unregister();
+			endpointDescriptionFactoryRegistration = null;
+		}
+		if (endpointDescriptionFactory != null) {
+			endpointDescriptionFactory.close();
+			endpointDescriptionFactory = null;
+		}
+	}
+	
+
+	
+	
+	
+	// Logging
+	
+	private ServiceTracker logServiceTracker = null;
+	private LogService logService = null;
+	private Object logServiceTrackerLock = new Object();
+
+	public LogService getLogService() {
+		if (context == null)
+			return null;
+		synchronized (logServiceTrackerLock) {
+			if (logServiceTracker == null) {
+				logServiceTracker = new ServiceTracker(context,
+						LogService.class.getName(), null);
+				logServiceTracker.open();
+			}
+			logService = (LogService) logServiceTracker.getService();
+			if (logService == null)
+				logService = new SystemLogService(PLUGIN_ID);
+			return logService;
+		}
+	}
+
+	public void log(IStatus status) {
+		if (logService == null)
+			logService = getLogService();
+		if (logService != null)
+			logService.log(null, LogHelper.getLogCode(status),
+					LogHelper.getLogMessage(status), status.getException());
+	}
+
+	public void log(ServiceReference sr, IStatus status) {
+		log(sr, LogHelper.getLogCode(status), LogHelper.getLogMessage(status),
+				status.getException());
+	}
+
+	public void log(ServiceReference sr, int level, String message, Throwable t) {
+		if (logService == null)
+			logService = getLogService();
+		if (logService != null)
+			logService.log(sr, level, message, t);
+	}
+
+	private void closeLogServiceTracker() {
+		synchronized (logServiceTrackerLock) {
+			if (logServiceTracker != null) {
+				logServiceTracker.close();
+				logServiceTracker = null;
+				logService = null;
+			}
 		}
 	}
 
