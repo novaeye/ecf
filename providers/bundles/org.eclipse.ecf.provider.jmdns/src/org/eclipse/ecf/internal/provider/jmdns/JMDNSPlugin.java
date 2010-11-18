@@ -10,6 +10,7 @@
  *****************************************************************************/
 package org.eclipse.ecf.internal.provider.jmdns;
 
+import java.util.Dictionary;
 import java.util.Properties;
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.ecf.core.ContainerConnectException;
@@ -27,6 +28,7 @@ import org.osgi.util.tracker.ServiceTracker;
 /**
  * The main plugin class to be used in the desktop.
  */
+@SuppressWarnings("unchecked")
 public class JMDNSPlugin implements BundleActivator {
 	public static final String NAME = "ecf.discovery.jmdns"; //$NON-NLS-1$
 
@@ -105,7 +107,7 @@ public class JMDNSPlugin implements BundleActivator {
 				//TODO-mkuppe we later might want to dispose jSLP when the last!!! consumer ungets the service 
 				//Though don't forget about the (ECF) Container which might still be in use
 			}
-		}, props);
+		}, (Dictionary) props);
 
 	}
 
