@@ -9,22 +9,16 @@
  ******************************************************************************/
 package org.eclipse.ecf.osgi.services.remoteserviceadmin;
 
-import org.eclipse.ecf.discovery.IDiscoveryAdvertiser;
-import org.eclipse.ecf.discovery.IServiceInfo;
+import org.osgi.framework.BundleContext;
 
-public interface IServiceInfoFactory {
+public abstract class AbstractTopologyManager {
 
-	public IServiceInfo createServiceInfoForDiscovery(
-			IDiscoveryAdvertiser advertiser,
-			EndpointDescription endpointDescription);
-
-	public IServiceInfo removeServiceInfoForUndiscovery(
-			IDiscoveryAdvertiser advertiser,
-			EndpointDescription endpointDescription);
-
-	public boolean removeServiceInfo(IDiscoveryAdvertiser advertiser,
-			EndpointDescription endpointDescription);
-
-	public void removeAllServiceInfos();
-
+	protected BundleContext context;
+	
+	public AbstractTopologyManager(BundleContext context) {
+		this.context = context;
+	}
+	public void close() {
+		this.context = null;
+	}
 }

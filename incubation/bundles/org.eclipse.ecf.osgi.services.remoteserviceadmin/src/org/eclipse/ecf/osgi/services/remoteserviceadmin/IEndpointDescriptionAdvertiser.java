@@ -9,22 +9,12 @@
  ******************************************************************************/
 package org.eclipse.ecf.osgi.services.remoteserviceadmin;
 
-import org.eclipse.ecf.discovery.IDiscoveryAdvertiser;
-import org.eclipse.ecf.discovery.IServiceInfo;
+public interface IEndpointDescriptionAdvertiser {
 
-public interface IServiceInfoFactory {
+	public boolean advertise(
+			org.osgi.service.remoteserviceadmin.EndpointDescription endpointDescription);
 
-	public IServiceInfo createServiceInfoForDiscovery(
-			IDiscoveryAdvertiser advertiser,
-			EndpointDescription endpointDescription);
-
-	public IServiceInfo removeServiceInfoForUndiscovery(
-			IDiscoveryAdvertiser advertiser,
-			EndpointDescription endpointDescription);
-
-	public boolean removeServiceInfo(IDiscoveryAdvertiser advertiser,
-			EndpointDescription endpointDescription);
-
-	public void removeAllServiceInfos();
+	public boolean unadvertise(
+			org.osgi.service.remoteserviceadmin.EndpointDescription endpointDescription);
 
 }

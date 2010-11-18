@@ -9,22 +9,12 @@
  ******************************************************************************/
 package org.eclipse.ecf.osgi.services.remoteserviceadmin;
 
-import org.eclipse.ecf.discovery.IDiscoveryAdvertiser;
-import org.eclipse.ecf.discovery.IServiceInfo;
+import org.eclipse.ecf.remoteservice.IRemoteServiceContainer;
+import org.osgi.framework.ServiceReference;
 
-public interface IServiceInfoFactory {
-
-	public IServiceInfo createServiceInfoForDiscovery(
-			IDiscoveryAdvertiser advertiser,
-			EndpointDescription endpointDescription);
-
-	public IServiceInfo removeServiceInfoForUndiscovery(
-			IDiscoveryAdvertiser advertiser,
-			EndpointDescription endpointDescription);
-
-	public boolean removeServiceInfo(IDiscoveryAdvertiser advertiser,
-			EndpointDescription endpointDescription);
-
-	public void removeAllServiceInfos();
-
+public interface IHostContainerSelector {
+	IRemoteServiceContainer[] selectHostContainers(
+			ServiceReference serviceReference,
+			String[] serviceExportedInterfaces,
+			String[] serviceExportedConfigs, String[] serviceIntents);
 }

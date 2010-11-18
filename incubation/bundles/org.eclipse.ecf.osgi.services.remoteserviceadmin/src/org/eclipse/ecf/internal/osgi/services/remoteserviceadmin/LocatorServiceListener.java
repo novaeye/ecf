@@ -9,138 +9,45 @@
  ******************************************************************************/
 package org.eclipse.ecf.internal.osgi.services.remoteserviceadmin;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
-import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.ecf.discovery.IDiscoveryLocator;
 import org.eclipse.ecf.discovery.IServiceEvent;
 import org.eclipse.ecf.discovery.IServiceInfo;
 import org.eclipse.ecf.discovery.IServiceListener;
 import org.eclipse.ecf.discovery.identity.IServiceID;
-import org.eclipse.ecf.internal.osgi.services.remoteserviceadmin.Activator.EndpointListenerHolder;
 import org.eclipse.ecf.osgi.services.remoteserviceadmin.DiscoveredEndpointDescription;
+import org.eclipse.ecf.osgi.services.remoteserviceadmin.IDiscoveredEndpointDescriptionFactory;
 import org.eclipse.ecf.osgi.services.remoteserviceadmin.RemoteConstants;
-import org.eclipse.ecf.osgi.services.remoteserviceadmin.IEndpointDescriptionFactory;
-import org.eclipse.osgi.framework.eventmgr.CopyOnWriteIdentityMap;
-import org.eclipse.osgi.framework.eventmgr.EventDispatcher;
-import org.eclipse.osgi.framework.eventmgr.EventManager;
-import org.eclipse.osgi.framework.eventmgr.ListenerQueue;
-import org.osgi.service.remoteserviceadmin.EndpointDescription;
-import org.osgi.service.remoteserviceadmin.EndpointListener;
 
 class LocatorServiceListener implements IServiceListener {
 
 	private Object listenerLock = new Object();
-
-	private Object initializationLock = new Object();
-	private boolean initialized = false;
-
-	private ListenerQueue queue;
-	private EventManager eventManager;
-
 	private IDiscoveryLocator locator;
+	private DiscoveryImpl discovery;
 
-	class EndpointListenerEvent {
+	private List<org.osgi.service.remoteserviceadmin.EndpointDescription> discoveredEndpointDescriptions = new ArrayList();
 
-		private EndpointListenerHolder holder;
-		private boolean discovered;
-
-		public EndpointListenerEvent(EndpointListenerHolder holder,
-				boolean discovered) {
-			this.holder = holder;
-			this.discovered = discovered;
-		}
-
-		public EndpointListenerHolder getEndpointListenerHolder() {
-			return holder;
-		}
-
-		public boolean isDiscovered() {
-			return discovered;
-		}
+	public LocatorServiceListener(DiscoveryImpl discovery) {
+		this(discovery, null);
 	}
 
-	private void initialize() {
-		if (!initialized) {
-			ThreadGroup eventGroup = new ThreadGroup(
-					"EventAdmin EndpointListener Dispatcher"); //$NON-NLS-1$
-			eventGroup.setDaemon(true);
-			eventManager = new EventManager(
-					"EventAdmin EndpointListener Dispatcher", eventGroup); //$NON-NLS-1$
-			queue = new ListenerQueue(eventManager);
-			CopyOnWriteIdentityMap listeners = new CopyOnWriteIdentityMap();
-			listeners.put(this, this);
-			queue.queueListeners(listeners.entrySet(), new EventDispatcher() {
-				public void dispatchEvent(Object eventListener,
-						Object listenerObject, int eventAction,
-						Object eventObject) {
-					if (locator == null)
-						return;
-					EndpointListenerHolder endpointListenerHolder = ((EndpointListenerEvent) eventObject)
-							.getEndpointListenerHolder();
-					final boolean discovered = ((EndpointListenerEvent) eventObject)
-							.isDiscovered();
-
-					final EndpointListener endpointListener = endpointListenerHolder
-							.getListener();
-					final EndpointDescription endpointDescription = endpointListenerHolder
-							.getDescription();
-					final String matchingFilter = endpointListenerHolder
-							.getMatchingFilter();
-
-					// run with SafeRunner, so that any exceptions are logged by
-					// our logger
-					SafeRunner.run(new ISafeRunnable() {
-						public void handleException(Throwable exception) {
-							logError("Exception notifying EndpointListener ",
-									exception);
-							Activator a = Activator.getDefault();
-							if (a != null)
-								a.log(new Status(
-										IStatus.ERROR,
-										Activator.PLUGIN_ID,
-										IStatus.ERROR,
-										"Exception in EndpointListener listener=" + endpointListener + " description=" + endpointDescription + " matchingFilter=" + matchingFilter, exception)); //$NON-NLS-1$
-						}
-
-						public void run() throws Exception {
-							// Call endpointAdded or endpointRemoved
-							if (discovered)
-								endpointListener.endpointAdded(
-										endpointDescription, matchingFilter);
-							else
-								endpointListener.endpointRemoved(
-										endpointDescription, matchingFilter);
-						}
-					});
-				}
-			});
-			initialized = true;
-		}
-	}
-
-	public LocatorServiceListener(IDiscoveryLocator locator) {
+	public LocatorServiceListener(DiscoveryImpl discovery,
+			IDiscoveryLocator locator) {
+		this.discovery = discovery;
 		this.locator = locator;
 	}
 
 	public void serviceDiscovered(IServiceEvent anEvent) {
-		synchronized (initializationLock) {
-			if (locator == null)
-				return;
-			initialize();
-		}
 		handleService(anEvent.getServiceInfo(), true);
 	}
 
 	public void serviceUndiscovered(IServiceEvent anEvent) {
-		synchronized (initializationLock) {
-			if (locator == null)
-				return;
-			initialize();
-		}
 		handleService(anEvent.getServiceInfo(), false);
 	}
 
@@ -161,38 +68,42 @@ class LocatorServiceListener implements IServiceListener {
 			IServiceInfo serviceInfo, boolean discovered) {
 		if (locator == null)
 			return;
-		DiscoveredEndpointDescription discoveredEndpointDescription = getEndpointDescription(
+		DiscoveredEndpointDescription discoveredEndpointDescription = getDiscoveredEndpointDescription(
 				serviceId, serviceInfo, discovered);
-		if (discovered) {
-			// XXX todo we check to make sure that the locator is the same one
-		}
 		if (discoveredEndpointDescription != null) {
-			synchronized (listenerLock) {
-				Activator.EndpointListenerHolder[] endpointListenerHolders = Activator
-						.getDefault().getMatchingEndpointListenerHolders(
-								discoveredEndpointDescription
-										.getEndpointDescription());
-				if (endpointListenerHolders != null) {
-					for (int i = 0; i < endpointListenerHolders.length; i++) {
-						queue.dispatchEventAsynchronous(0,
-								new EndpointListenerEvent(
-										endpointListenerHolders[i], discovered));
-					}
-				} else {
-					logWarning("No matching EndpointListeners found for"
-							+ (discovered ? "discovered" : "undiscovered")
-							+ " serviceInfo=" + serviceInfo);
-				}
-
-			}
+			handleEndpointDescription(
+					discoveredEndpointDescription.getEndpointDescription(),
+					discovered);
 		} else {
 			logWarning("handleOSGiServiceEvent discoveredEndpointDescription is null for service info="
 					+ serviceInfo + ",discovered=" + discovered);
 		}
 	}
 
+	public void handleEndpointDescription(
+			org.osgi.service.remoteserviceadmin.EndpointDescription endpointDescription,
+			boolean discovered) {
+		synchronized (listenerLock) {
+			if (discovered)
+				discoveredEndpointDescriptions.add(endpointDescription);
+			else
+				discoveredEndpointDescriptions.remove(endpointDescription);
+
+			discovery.queueEndpointDescription(endpointDescription, discovered);
+		}
+	}
+
+	public Collection<org.osgi.service.remoteserviceadmin.EndpointDescription> getEndpointDescriptions() {
+		synchronized (listenerLock) {
+			Collection<org.osgi.service.remoteserviceadmin.EndpointDescription> result = new ArrayList<org.osgi.service.remoteserviceadmin.EndpointDescription>();
+			result.addAll(discoveredEndpointDescriptions);
+			return result;
+		}
+	}
+
 	private void logWarning(String message) {
 		// XXX todo
+		System.out.println(message);
 	}
 
 	private void logError(String message) {
@@ -206,15 +117,11 @@ class LocatorServiceListener implements IServiceListener {
 		}
 	}
 
-	private DiscoveredEndpointDescription getEndpointDescription(
+	private DiscoveredEndpointDescription getDiscoveredEndpointDescription(
 			IServiceID serviceId, IServiceInfo serviceInfo, boolean discovered) {
-		// Get activator
-		Activator activator = Activator.getDefault();
-		if (activator == null)
-			return null;
 		// Get IEndpointDescriptionFactory
-		IEndpointDescriptionFactory factory = activator
-				.getEndpointDescriptionFactory();
+		IDiscoveredEndpointDescriptionFactory factory = discovery
+				.getDiscoveredEndpointDescriptionFactory();
 		if (factory == null) {
 			logError("No IEndpointDescriptionFactory found, could not create EndpointDescription for "
 					+ (discovered ? "discovered" : "undiscovered")
@@ -243,17 +150,8 @@ class LocatorServiceListener implements IServiceListener {
 	}
 
 	public void close() {
-		synchronized (initializationLock) {
-			if (initialized) {
-				synchronized (listenerLock) {
-					if (eventManager != null) {
-						eventManager.close();
-						eventManager = null;
-						queue = null;
-					}
-				}
-			}
-			locator = null;
-		}
+		locator = null;
+		discovery = null;
+		discoveredEndpointDescriptions.clear();
 	}
 }
