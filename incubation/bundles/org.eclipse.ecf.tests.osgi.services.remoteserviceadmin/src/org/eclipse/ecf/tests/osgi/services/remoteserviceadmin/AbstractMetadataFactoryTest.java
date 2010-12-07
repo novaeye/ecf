@@ -47,7 +47,7 @@ public abstract class AbstractMetadataFactoryTest extends ECFAbstractTestCase {
 	protected IDiscoveryLocator discoveryLocator;
 
 	protected IDiscoveryLocator getDiscoveryLocator() {
-		ServiceTracker serviceTracker = new ServiceTracker(Activator.getContext(),IDiscoveryLocator.class.getName(), null);
+		ServiceTracker serviceTracker = new ServiceTracker(Activator.getDefault().getContext(),IDiscoveryLocator.class.getName(), null);
 		serviceTracker.open();
 		IDiscoveryLocator result = (IDiscoveryLocator) serviceTracker.getService();
 		serviceTracker.close();
@@ -55,7 +55,7 @@ public abstract class AbstractMetadataFactoryTest extends ECFAbstractTestCase {
 	}
 	
 	protected IDiscoveryAdvertiser getDiscoveryAdvertiser() {
-		ServiceTracker serviceTracker = new ServiceTracker(Activator.getContext(),IDiscoveryAdvertiser.class.getName(), null);
+		ServiceTracker serviceTracker = new ServiceTracker(Activator.getDefault().getContext(),IDiscoveryAdvertiser.class.getName(), null);
 		serviceTracker.open();
 		IDiscoveryAdvertiser result = (IDiscoveryAdvertiser) serviceTracker.getService();
 		serviceTracker.close();
@@ -98,7 +98,7 @@ public abstract class AbstractMetadataFactoryTest extends ECFAbstractTestCase {
 		Long remoteServiceId = createECFRemoteServiceId(props);
 		// Add extra properties
 		addExtraProperties(props);
-		return new EndpointDescription(props,containerID,remoteServiceId,null,null,null);
+		return new EndpointDescription(props,containerID.getNamespace().getName(),remoteServiceId,null,null,null);
 	}
 	
 	protected EndpointDescription createFullEndpointDescription() {
@@ -115,7 +115,7 @@ public abstract class AbstractMetadataFactoryTest extends ECFAbstractTestCase {
 		String rsFilter = createECFRSFilter(props);
 		// Add extra properties
 		addExtraProperties(props);
-		return new EndpointDescription(props,containerID, remoteServiceId,targetID,idFilter,rsFilter);
+		return new EndpointDescription(props,containerID.getNamespace().getName(), remoteServiceId,targetID,idFilter,rsFilter);
 	}
 
 	protected void addExtraProperties(Map<String, Object> props) {
@@ -130,7 +130,7 @@ public abstract class AbstractMetadataFactoryTest extends ECFAbstractTestCase {
 		ID containerID = createECFContainerID(props);
 		Long remoteServiceId = createECFRemoteServiceId(props);
 		// This should throw a runtime exception 
-		return new EndpointDescription(props,containerID,remoteServiceId.longValue(),null,null,null);
+		return new EndpointDescription(props,containerID.getNamespace().getName(),remoteServiceId.longValue(),null,null,null);
 	}
 	
 	protected EndpointDescription createBadECFEndpointDescrption() throws Exception {

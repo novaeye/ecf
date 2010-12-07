@@ -19,15 +19,13 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.ecf.discovery.IDiscoveryAdvertiser;
 import org.eclipse.ecf.discovery.IDiscoveryLocator;
 import org.eclipse.ecf.discovery.IServiceInfo;
-import org.eclipse.ecf.osgi.services.remoteserviceadmin.DefaultDiscoveredEndpointDescriptionFactory;
-import org.eclipse.ecf.osgi.services.remoteserviceadmin.DefaultServiceInfoFactory;
+import org.eclipse.ecf.osgi.services.remoteserviceadmin.DiscoveredEndpointDescriptionFactory;
 import org.eclipse.ecf.osgi.services.remoteserviceadmin.IDiscoveredEndpointDescriptionFactory;
 import org.eclipse.ecf.osgi.services.remoteserviceadmin.IServiceInfoFactory;
+import org.eclipse.ecf.osgi.services.remoteserviceadmin.ServiceInfoFactory;
 import org.eclipse.equinox.concurrent.future.IExecutor;
 import org.eclipse.equinox.concurrent.future.IProgressRunnable;
 import org.eclipse.equinox.concurrent.future.ThreadsExecutor;
@@ -46,22 +44,20 @@ import org.osgi.util.tracker.BundleTracker;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
-public class DiscoveryImpl {
-
-	private static final boolean DEBUG = false;
+public class Discovery {
 
 	private BundleContext context;
 	private IExecutor executor;
 
 	// service info factory default
-	private DefaultServiceInfoFactory defaultServiceInfoFactory;
+	private ServiceInfoFactory serviceInfoFactory;
 	private ServiceRegistration defaultServiceInfoFactoryRegistration;
 	// service info factory service tracker
 	private Object serviceInfoFactoryTrackerLock = new Object();
 	private ServiceTracker serviceInfoFactoryTracker;
 
 	// endpoint description factory default
-	private DefaultDiscoveredEndpointDescriptionFactory defaultEndpointDescriptionFactory;
+	private DiscoveredEndpointDescriptionFactory defaultEndpointDescriptionFactory;
 	private ServiceRegistration defaultEndpointDescriptionFactoryRegistration;
 	// endpoint description factory tracker
 	private Object endpointDescriptionFactoryTrackerLock = new Object();
@@ -86,7 +82,7 @@ public class DiscoveryImpl {
 	private BundleTracker bundleTracker;
 	private EndpointDescriptionBundleTrackerCustomizer bundleTrackerCustomizer;
 
-	public DiscoveryImpl(BundleContext context) {
+	public Discovery(BundleContext context) {
 		this.context = context;
 		this.executor = new ThreadsExecutor();
 	}
@@ -98,18 +94,19 @@ public class DiscoveryImpl {
 		final Properties properties = new Properties();
 		properties.put(Constants.SERVICE_RANKING,
 				new Integer(Integer.MIN_VALUE));
-		defaultServiceInfoFactory = new DefaultServiceInfoFactory();
+		serviceInfoFactory = new ServiceInfoFactory();
 		defaultServiceInfoFactoryRegistration = context.registerService(
-				IServiceInfoFactory.class.getName(), defaultServiceInfoFactory,
+				IServiceInfoFactory.class.getName(), serviceInfoFactory,
 				(Dictionary) properties);
-		defaultEndpointDescriptionFactory = new DefaultDiscoveredEndpointDescriptionFactory();
+		defaultEndpointDescriptionFactory = new DiscoveredEndpointDescriptionFactory();
 		defaultEndpointDescriptionFactoryRegistration = context
 				.registerService(
 						IDiscoveredEndpointDescriptionFactory.class.getName(),
 						defaultEndpointDescriptionFactory,
 						(Dictionary) properties);
-		
-		// Create thread group, event manager, and eventQueue, and setup to dispatch EndpointListenerEvents
+
+		// Create thread group, event manager, and eventQueue, and setup to
+		// dispatch EndpointListenerEvents
 		ThreadGroup eventGroup = new ThreadGroup(
 				"EventAdmin Discovery EndpointListener Dispatcher"); //$NON-NLS-1$
 		eventGroup.setDaemon(true);
@@ -121,34 +118,48 @@ public class DiscoveryImpl {
 		eventQueue.queueListeners(listeners.entrySet(), new EventDispatcher() {
 			public void dispatchEvent(Object eventListener,
 					Object listenerObject, int eventAction, Object eventObject) {
-
+				final String logMethodName = "dispatchEvent";
 				final EndpointListenerEvent event = (EndpointListenerEvent) eventObject;
 				final EndpointListener endpointListener = event
 						.getEndpointListener();
 				final EndpointDescription endpointDescription = event
 						.getEndointDescription();
 				final String matchingFilter = event.getMatchingFilter();
-				
+
 				try {
 					if (event.isDiscovered())
 						endpointListener.endpointAdded(endpointDescription,
 								matchingFilter);
 					else
-						endpointListener.endpointRemoved(
-								endpointDescription, matchingFilter);
+						endpointListener.endpointRemoved(endpointDescription,
+								matchingFilter);
 				} catch (Exception e) {
-					String message = "Exception in EndpointListener listener=" + endpointListener + " description=" + endpointDescription + " matchingFilter=" + matchingFilter;
-					logError(message, e);
+					String message = "Exception in EndpointListener listener="
+							+ endpointListener + " description="
+							+ endpointDescription + " matchingFilter="
+							+ matchingFilter;
+					logError(logMethodName, message, e);
 				} catch (LinkageError e) {
-					String message = "LinkageError in EndpointListener listener=" + endpointListener + " description=" + endpointDescription + " matchingFilter=" + matchingFilter;
-					logError(message, e);
+					String message = "LinkageError in EndpointListener listener="
+							+ endpointListener
+							+ " description="
+							+ endpointDescription
+							+ " matchingFilter="
+							+ matchingFilter;
+					logError(logMethodName, message, e);
 				} catch (AssertionError e) {
-					String message = "AssertionError in EndpointListener listener=" + endpointListener + " description=" + endpointDescription + " matchingFilter=" + matchingFilter;
-					logError(message, e);
+					String message = "AssertionError in EndpointListener listener="
+							+ endpointListener
+							+ " description="
+							+ endpointDescription
+							+ " matchingFilter="
+							+ matchingFilter;
+					logError(logMethodName, message, e);
 				}
 			}
 		});
-		// Register the endpoint listener tracker, so that endpoint listeners that are subsequently added
+		// Register the endpoint listener tracker, so that endpoint listeners
+		// that are subsequently added
 		// will then be notified of discovered endpoints
 		endpointListenerTrackerCustomizer = new EndpointListenerTrackerCustomizer(
 				this);
@@ -168,13 +179,14 @@ public class DiscoveryImpl {
 		// Get any existing locators
 		Object[] locators = locatorServiceTracker.getServices();
 		if (locators != null) {
-			// for all of them 
+			// for all of them
 			for (int i = 0; i < locators.length; i++) {
 				// Add service listener to locator
 				openLocator((IDiscoveryLocator) locators[i]);
 			}
 		}
-		// Create bundle tracker for reading local/xml-file endpoint descriptions
+		// Create bundle tracker for reading local/xml-file endpoint
+		// descriptions
 		bundleTrackerCustomizer = new EndpointDescriptionBundleTrackerCustomizer(
 				localLocatorServiceListener);
 		bundleTracker = new BundleTracker(context, Bundle.ACTIVE
@@ -183,16 +195,11 @@ public class DiscoveryImpl {
 		bundleTracker.open();
 	}
 
-	private void logError(String message, Throwable e) {
-		Activator a = Activator.getDefault();
-		if (a != null)
-			a.log(new Status(
-					IStatus.ERROR,
-					Activator.PLUGIN_ID,
-					IStatus.ERROR,message
-					, e)); //$NON-NLS-1$
-
+	private void logError(String methodName, String message, Throwable e) {
+		LogUtility.logError(methodName, DebugOptions.DISCOVERY,
+				this.getClass(), message, e);
 	}
+
 	public void close() {
 		if (bundleTracker != null) {
 			bundleTracker.close();
@@ -269,9 +276,9 @@ public class DiscoveryImpl {
 			defaultServiceInfoFactoryRegistration.unregister();
 			defaultServiceInfoFactoryRegistration = null;
 		}
-		if (defaultServiceInfoFactory != null) {
-			defaultServiceInfoFactory.close();
-			defaultServiceInfoFactory = null;
+		if (serviceInfoFactory != null) {
+			serviceInfoFactory.close();
+			serviceInfoFactory = null;
 		}
 		if (locatorServiceTracker != null) {
 			locatorServiceTracker.close();
@@ -295,7 +302,13 @@ public class DiscoveryImpl {
 				advertiserTracker.open();
 			}
 		}
-		return (IDiscoveryAdvertiser[]) advertiserTracker.getServices();
+		ServiceReference[] advertiserRefs = advertiserTracker.getServiceReferences();
+		if (advertiserRefs == null) return null;
+		List<IDiscoveryAdvertiser> results = new ArrayList<IDiscoveryAdvertiser>();
+		for(int i=0; i < advertiserRefs.length; i++) {
+			results.add((IDiscoveryAdvertiser) context.getService(advertiserRefs[i]));
+		}
+		return results.toArray(new IDiscoveryAdvertiser[results.size()]);
 	}
 
 	private void openLocator(IDiscoveryLocator locator) {
@@ -336,6 +349,7 @@ public class DiscoveryImpl {
 
 	Collection<org.osgi.service.remoteserviceadmin.EndpointDescription> getAllDiscoveredEndpointDescriptions() {
 		Collection<org.osgi.service.remoteserviceadmin.EndpointDescription> result = new ArrayList();
+		if (localLocatorServiceListener == null) return result;
 		// Get local first
 		result.addAll(localLocatorServiceListener.getEndpointDescriptions());
 		synchronized (locatorListeners) {
@@ -362,20 +376,13 @@ public class DiscoveryImpl {
 
 			}
 		} else {
-			if (DEBUG)
-				logInfo("No matching EndpointListeners found for "
-						+ (discovered ? "discovered" : "undiscovered")
-						+ " endpointDescription=" + endpointDescription);
+			LogUtility.logWarning("queueEndpointDescription",
+					DebugOptions.DISCOVERY, this.getClass(),
+					"No matching EndpointListeners found for "
+							+ (discovered ? "discovered" : "undiscovered")
+							+ " endpointDescription=" + endpointDescription);
 		}
 
-	}
-
-	private void logInfo(String info) {
-		log(new Status(IStatus.INFO, Activator.PLUGIN_ID, IStatus.INFO, info,
-				null));
-	}
-
-	private void log(IStatus status) {
 	}
 
 	private void processInitialLocatorServices(final IDiscoveryLocator locator,
@@ -536,7 +543,7 @@ public class DiscoveryImpl {
 					.getService(refs[i]);
 			if (listener == null)
 				continue;
-			List filters = Activator.getStringPlusProperty(
+			List filters = PropertiesUtil.getStringPlusProperty(
 					getMapFromProperties(refs[i]),
 					EndpointListener.ENDPOINT_LISTENER_SCOPE);
 			String matchingFilter = isMatch(description, filters);

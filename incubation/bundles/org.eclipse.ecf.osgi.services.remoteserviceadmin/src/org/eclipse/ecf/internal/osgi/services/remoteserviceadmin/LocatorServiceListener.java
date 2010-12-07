@@ -14,8 +14,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.ecf.discovery.IDiscoveryLocator;
 import org.eclipse.ecf.discovery.IServiceEvent;
 import org.eclipse.ecf.discovery.IServiceInfo;
@@ -29,16 +27,15 @@ class LocatorServiceListener implements IServiceListener {
 
 	private Object listenerLock = new Object();
 	private IDiscoveryLocator locator;
-	private DiscoveryImpl discovery;
+	private Discovery discovery;
 
 	private List<org.osgi.service.remoteserviceadmin.EndpointDescription> discoveredEndpointDescriptions = new ArrayList();
 
-	public LocatorServiceListener(DiscoveryImpl discovery) {
+	public LocatorServiceListener(Discovery discovery) {
 		this(discovery, null);
 	}
 
-	public LocatorServiceListener(DiscoveryImpl discovery,
-			IDiscoveryLocator locator) {
+	public LocatorServiceListener(Discovery discovery, IDiscoveryLocator locator) {
 		this.discovery = discovery;
 		this.locator = locator;
 	}
@@ -75,7 +72,7 @@ class LocatorServiceListener implements IServiceListener {
 					discoveredEndpointDescription.getEndpointDescription(),
 					discovered);
 		} else {
-			logWarning("handleOSGiServiceEvent discoveredEndpointDescription is null for service info="
+			logWarning("handleOSGiServiceEvent","discoveredEndpointDescription is null for service info="
 					+ serviceInfo + ",discovered=" + discovered);
 		}
 	}
@@ -101,31 +98,31 @@ class LocatorServiceListener implements IServiceListener {
 		}
 	}
 
-	private void logWarning(String message) {
-		// XXX todo
-		System.out.println(message);
+	private void logWarning(String methodName, String message) {
+		LogUtility.logWarning(methodName, DebugOptions.DISCOVERY, this.getClass(), message);
 	}
 
-	private void logError(String message) {
-		logError(message, null);
+	private void logError(String methodName, String message) {
+		logError(methodName, message, null);
 	}
 
-	private void logError(String message, Throwable t) {
-		Activator a = Activator.getDefault();
-		if (a != null) {
-			a.log(new Status(IStatus.ERROR, Activator.PLUGIN_ID, message, t));
-		}
+	private void logError(String methodName, String message, Throwable t) {
+		LogUtility.logError(methodName, DebugOptions.DISCOVERY,
+				this.getClass(), message, t);
 	}
 
 	private DiscoveredEndpointDescription getDiscoveredEndpointDescription(
 			IServiceID serviceId, IServiceInfo serviceInfo, boolean discovered) {
 		// Get IEndpointDescriptionFactory
+		final String methodName = "getDiscoveredEndpointDescription";
 		IDiscoveredEndpointDescriptionFactory factory = discovery
 				.getDiscoveredEndpointDescriptionFactory();
 		if (factory == null) {
-			logError("No IEndpointDescriptionFactory found, could not create EndpointDescription for "
-					+ (discovered ? "discovered" : "undiscovered")
-					+ " serviceInfo=" + serviceInfo);
+			logError(
+					methodName,
+					"No IEndpointDescriptionFactory found, could not create EndpointDescription for "
+							+ (discovered ? "discovered" : "undiscovered")
+							+ " serviceInfo=" + serviceInfo);
 			return null;
 		}
 		try {
@@ -136,12 +133,15 @@ class LocatorServiceListener implements IServiceListener {
 					locator, serviceInfo) : factory
 					.getUndiscoveredEndpointDescription(locator, serviceId);
 		} catch (Exception e) {
-			logError("Exception calling IEndpointDescriptionFactory."
-					+ ((discovered) ? "createDiscoveredEndpointDescription"
-							: "getUndiscoveredEndpointDescription"), e);
+			logError(
+					methodName,
+					"Exception calling IEndpointDescriptionFactory."
+							+ ((discovered) ? "createDiscoveredEndpointDescription"
+									: "getUndiscoveredEndpointDescription"), e);
 			return null;
 		} catch (NoClassDefFoundError e) {
 			logError(
+					methodName,
 					"NoClassDefFoundError calling IEndpointDescriptionFactory."
 							+ ((discovered) ? "createDiscoveredEndpointDescription"
 									: "getUndiscoveredEndpointDescription"), e);

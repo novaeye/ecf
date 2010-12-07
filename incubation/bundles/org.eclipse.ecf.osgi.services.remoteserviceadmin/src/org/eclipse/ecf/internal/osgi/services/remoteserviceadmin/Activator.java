@@ -9,19 +9,15 @@
  ******************************************************************************/
 package org.eclipse.ecf.internal.osgi.services.remoteserviceadmin;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.xml.parsers.SAXParserFactory;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.ecf.core.IContainerManager;
 import org.eclipse.ecf.core.util.LogHelper;
 import org.eclipse.ecf.core.util.SystemLogService;
+import org.eclipse.ecf.osgi.services.remoteserviceadmin.TopologyManager;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -43,8 +39,8 @@ public class Activator implements BundleActivator {
 		return instance;
 	}
 
-	private DiscoveryImpl discovery;
-	private TopologyManagerImpl topologyManager;
+	private Discovery discovery;
+	private TopologyManager topologyManager;
 
 	/*
 	 * (non-Javadoc)
@@ -56,12 +52,12 @@ public class Activator implements BundleActivator {
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
 		Activator.instance = this;
-		discovery = new DiscoveryImpl(context);
-		topologyManager = new TopologyManagerImpl(context, discovery);
-		// start discovery
-		discovery.start();
+		discovery = new Discovery(context);
+		topologyManager = new TopologyManager(context, discovery);
 		// start topology manager
 		topologyManager.start();
+		// start discovery
+		discovery.start();
 	}
 
 	/*
@@ -81,6 +77,7 @@ public class Activator implements BundleActivator {
 		}
 		stopSAXParserTracker();
 		stopLogServiceTracker();
+		stopContainerManagerTracker();
 		Activator.context = null;
 		Activator.instance = null;
 	}
@@ -181,40 +178,21 @@ public class Activator implements BundleActivator {
 		}
 	}
 
-	public static List getStringPlusProperty(Map properties, String key) {
-		Object value = properties.get(key);
-		if (value == null) {
-			return Collections.EMPTY_LIST;
-		}
+	private ServiceTracker containerManagerTracker;
 
-		if (value instanceof String) {
-			return Collections.singletonList((String) value);
+	public IContainerManager getContainerManager() {
+		if (containerManagerTracker == null) {
+			containerManagerTracker = new ServiceTracker(context,
+					IContainerManager.class.getName(), null);
+			containerManagerTracker.open();
 		}
-
-		if (value instanceof String[]) {
-			String[] values = (String[]) value;
-			List result = new ArrayList(values.length);
-			for (int i = 0; i < values.length; i++) {
-				if (values[i] != null) {
-					result.add(values[i]);
-				}
-			}
-			return Collections.unmodifiableList(result);
-		}
-
-		if (value instanceof Collection) {
-			Collection values = (Collection) value;
-			List result = new ArrayList(values.size());
-			for (Iterator iter = values.iterator(); iter.hasNext();) {
-				Object v = iter.next();
-				if (v instanceof String) {
-					result.add((String) v);
-				}
-			}
-			return Collections.unmodifiableList(result);
-		}
-
-		return Collections.EMPTY_LIST;
+		return (IContainerManager) containerManagerTracker.getService();
 	}
 
+	private void stopContainerManagerTracker() {
+		if (containerManagerTracker != null) {
+			containerManagerTracker.close();
+			containerManagerTracker = null;
+		}
+	}
 }
