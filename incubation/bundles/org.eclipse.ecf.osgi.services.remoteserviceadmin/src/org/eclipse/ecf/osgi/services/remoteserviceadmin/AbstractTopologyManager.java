@@ -12,6 +12,7 @@ package org.eclipse.ecf.osgi.services.remoteserviceadmin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.List;
 import java.util.Properties;
 
@@ -58,7 +59,7 @@ public abstract class AbstractTopologyManager {
 		defaultEndpointDescriptionAdvertiserRegistration = getContext()
 				.registerService(
 						IEndpointDescriptionAdvertiser.class.getName(),
-						endpointDescriptionAdvertiser, properties);
+						endpointDescriptionAdvertiser, (Dictionary) properties);
 	}
 
 	protected BundleContext getContext() {
@@ -196,30 +197,35 @@ public abstract class AbstractTopologyManager {
 				this.getClass(), message);
 	}
 
-	protected void publishExportedRegistrations(
-			Collection<org.osgi.service.remoteserviceadmin.ExportRegistration> registrations) {
-		for (org.osgi.service.remoteserviceadmin.ExportRegistration reg : registrations) {
-			if (reg instanceof ExportRegistration) {
-				publishExportedRegistration((ExportRegistration) reg);
-			}
-		}
-	}
-
-	private void publishExportedRegistration(ExportRegistration reg) {
+	protected void advertiseEndpointDescription(EndpointDescription endpointDescription) {
 		IEndpointDescriptionAdvertiser advertiser = getEndpointDescriptionAdvertiser();
 		if (advertiser == null) {
 			logError("advertiseExportedRegistration",
-					"No endpoint description advertiser available to advertise ExportRegistration="
-							+ reg);
+					"No endpoint description advertiser available to advertise endpointDescription="
+							+ endpointDescription);
 			return;
 		}
-		// Now advertise endpoint description using endpoint description
-		// advertiser
-		IStatus result = advertiser.advertise((EndpointDescription) reg
-				.getExportReference().getExportedEndpoint());
+		// Now advertise endpoint description using endpoint description advertiser
+		IStatus result = advertiser.advertise(endpointDescription);
 		if (!result.isOK())
 			logError("advertiseExportedRegistration",
-					"Advertise of ExportRegistration=" + reg + " FAILED",
+					"Advertise of endpointDescription=" + endpointDescription + " FAILED",
+					result);
+	}
+
+	protected void unadvertiseEndpointDescription(EndpointDescription endpointDescription) {
+		IEndpointDescriptionAdvertiser advertiser = getEndpointDescriptionAdvertiser();
+		if (advertiser == null) {
+			logError("advertiseExportedRegistration",
+					"No endpoint description advertiser available to unadvertise endpointDescription="
+							+ endpointDescription);
+			return;
+		}
+		// Now unadvertise endpoint description using endpoint description advertiser
+		IStatus result = advertiser.unadvertise(endpointDescription);
+		if (!result.isOK())
+			logError("advertiseExportedRegistration",
+					"Unadvertise of endpointDescription=" + endpointDescription + " FAILED",
 					result);
 	}
 

@@ -10,6 +10,7 @@
 package org.eclipse.ecf.osgi.services.remoteserviceadmin;
 
 import java.util.Collection;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -45,7 +46,7 @@ public class TopologyManager extends AbstractTopologyManager implements
 						+ org.osgi.service.remoteserviceadmin.RemoteConstants.ENDPOINT_ID
 						+ "=*)");
 		endpointListenerRegistration = getContext().registerService(
-				EndpointListener.class.getName(), this, props);
+				EndpointListener.class.getName(), this, (Dictionary) props);
 
 		// Register as EventHook, so that we get notified when remote services
 		// are registered
@@ -192,7 +193,9 @@ public class TopologyManager extends AbstractTopologyManager implements
 		}
 
 		// publish exported registrations
-		publishExportedRegistrations(registrations);
+		for (org.osgi.service.remoteserviceadmin.ExportRegistration reg : registrations) {
+			advertiseEndpointDescription((EndpointDescription) reg.getExportReference().getExportedEndpoint());
+		}
 
 	}
 
@@ -210,7 +213,12 @@ public class TopologyManager extends AbstractTopologyManager implements
 							+ ".  Remote service NOT UNEXPORTED");
 			return;
 		}
-		rsa.unexportService(serviceReference);
+		EndpointDescription[] endpointDescriptions = rsa.unexportService(serviceReference);
+		if (endpointDescriptions != null) {
+			for(int i=0; i < endpointDescriptions.length; i++) {
+				unadvertiseEndpointDescription(endpointDescriptions[i]);
+			}
+		}
 	}
 
 }
