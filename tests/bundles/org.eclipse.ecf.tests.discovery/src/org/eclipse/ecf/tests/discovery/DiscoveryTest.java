@@ -51,12 +51,29 @@ public abstract class DiscoveryTest extends AbstractDiscoveryTest {
 		discoveryAdvertiser.unregisterService(serviceInfo);
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.ecf.tests.discovery.AbstractDiscoveryTest#setUp()
+	 */
+	protected void setUp() throws Exception {
+		super.setUp();
+		
+		// sanity checks to make sure tests don't interfere 
+		IServiceTypeID[] types = discoveryLocator.getServiceTypes();
+		IServiceInfo[] infos = discoveryLocator.getServices();
+		assertTrue(types == null ? true : types.length == 0);
+		assertTrue(infos == null ? true : infos.length == 0);
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see junit.framework.TestCase#tearDown()
 	 */
 	protected void tearDown() throws Exception {
 		discoveryAdvertiser.unregisterService(serviceInfo);
+		discoveryLocator.purgeCache();
+		IServiceInfo info = discoveryLocator.getServiceInfo(serviceInfo.getServiceID());
+		assertNull(info);
+		
 		super.tearDown();
 	}
 
