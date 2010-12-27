@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Composent, Inc. and others. All rights reserved. This
+ * Copyright (c) 2010-2011 Composent, Inc. and others. All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -7,23 +7,26 @@
  * Contributors:
  *   Composent, Inc. - initial API and implementation
  ******************************************************************************/
-package org.eclipse.ecf.internal.osgi.services.remoteserviceadmin;
+package org.eclipse.ecf.osgi.services.remoteserviceadmin;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.identity.IDCreateException;
 import org.eclipse.ecf.core.identity.Namespace;
-import org.eclipse.ecf.osgi.services.remoteserviceadmin.EndpointDescription;
-import org.eclipse.ecf.osgi.services.remoteserviceadmin.EndpointDescriptionParseException;
-import org.eclipse.ecf.osgi.services.remoteserviceadmin.RemoteConstants;
+import org.eclipse.ecf.internal.osgi.services.remoteserviceadmin.DebugOptions;
+import org.eclipse.ecf.internal.osgi.services.remoteserviceadmin.EndpointDescriptionParser;
+import org.eclipse.ecf.internal.osgi.services.remoteserviceadmin.IDUtil;
+import org.eclipse.ecf.internal.osgi.services.remoteserviceadmin.LogUtility;
+import org.eclipse.ecf.internal.osgi.services.remoteserviceadmin.PropertiesUtil;
 import org.osgi.framework.Constants;
 
-public class EndpointDescriptionReader {
+public class EndpointDescriptionReader implements IEndpointDescriptionReader {
 
 	public org.osgi.service.remoteserviceadmin.EndpointDescription[] readEndpointDescriptions(
 			InputStream input) throws IOException {
@@ -34,7 +37,7 @@ public class EndpointDescriptionReader {
 		// Get possible endpoint descriptions
 		List<EndpointDescriptionParser.EndpointDescription> parsedDescriptions = parser
 				.getEndpointDescriptions();
-		List<org.osgi.service.remoteserviceadmin.EndpointDescription> results = new ArrayList();
+		List<org.osgi.service.remoteserviceadmin.EndpointDescription> results = new ArrayList<org.osgi.service.remoteserviceadmin.EndpointDescription>();
 		// For each one parsed, get properties and
 		for (EndpointDescriptionParser.EndpointDescription ed : parsedDescriptions) {
 			Map parsedProperties = ed.getProperties();
@@ -108,25 +111,34 @@ public class EndpointDescriptionReader {
 				}
 				results.add(result);
 			} catch (Exception e) {
-				LogUtility.logError("readEndpointDescriptions", DebugOptions.ENDPOINTDESCRIPTIONREADER, this.getClass(), "Exception parsing endpoint description properties", e);
+				LogUtility.logError("readEndpointDescriptions",
+						DebugOptions.ENDPOINTDESCRIPTIONREADER,
+						this.getClass(),
+						"Exception parsing endpoint description properties", e);
 			}
 		}
-		return (org.osgi.service.remoteserviceadmin.EndpointDescription[]) results
-				.toArray(new org.osgi.service.remoteserviceadmin.EndpointDescription[] {});
+		return results.toArray(new EndpointDescription[results.size()]);
 	}
 
 	private org.osgi.service.remoteserviceadmin.EndpointDescription createECFEndpointDescription(
 			ID endpointContainerID, Map parsedProperties)
 			throws EndpointDescriptionParseException {
+		Map<String, Object> endointDescriptionProperties = PropertiesUtil
+				.copyNonECFProperties(parsedProperties,
+						new TreeMap<String, Object>());
 		// we get the remote service id...default 0 means that it's not an ECF
 		// remote service
 		Long remoteServiceId = PropertiesUtil.getLongWithDefault(
-				parsedProperties, RemoteConstants.ENDPOINT_REMOTESERVICE_ID,
-				null);
+				parsedProperties,
+				org.eclipse.ecf.remoteservice.Constants.SERVICE_ID, null);
 		if (remoteServiceId == null)
 			throw new EndpointDescriptionParseException(
-					RemoteConstants.ENDPOINT_REMOTESERVICE_ID
+					org.eclipse.ecf.remoteservice.Constants.SERVICE_ID
 							+ " is not set in endpoint description.  It must be set to Long value");
+		endointDescriptionProperties.put(
+				org.eclipse.ecf.remoteservice.Constants.SERVICE_ID,
+				remoteServiceId);
+
 		// target ID
 		ID targetID = null;
 		String targetName = (String) parsedProperties
@@ -143,11 +155,9 @@ public class EndpointDescriptionReader {
 		String rsFilter = (String) parsedProperties
 				.get(RemoteConstants.ENDPOINT_REMOTESERVICE_FILTER);
 
-		Map properties = PropertiesUtil.getNonECFProperties(parsedProperties);
-
-		return new EndpointDescription(properties, endpointContainerID
-				.getNamespace().getName(), remoteServiceId.longValue(),
-				targetID, idFilter, rsFilter);
+		return new EndpointDescription(endointDescriptionProperties,
+				endpointContainerID.getNamespace().getName(), targetID,
+				idFilter, rsFilter);
 	}
 
 	private ID[] getIDFilter(Namespace namespace, Map<String, Object> properties) {
@@ -195,14 +205,16 @@ public class EndpointDescriptionReader {
 	private ID getContainerID(Map<String, Object> properties)
 			throws IDCreateException {
 		// We try to get the ID from the OSGi id
-		String osgiId = PropertiesUtil.verifyStringProperty(properties,
-				org.osgi.service.remoteserviceadmin.RemoteConstants.ENDPOINT_ID);
+		String osgiId = PropertiesUtil
+				.verifyStringProperty(
+						properties,
+						org.osgi.service.remoteserviceadmin.RemoteConstants.ENDPOINT_ID);
 		if (osgiId == null)
 			throw new IDCreateException(
 					org.osgi.service.remoteserviceadmin.RemoteConstants.ENDPOINT_ID
 							+ " must not be null");
-		String containerIDNamespace = PropertiesUtil.verifyStringProperty(properties,
-				RemoteConstants.ENDPOINT_CONTAINER_ID_NAMESPACE);
+		String containerIDNamespace = PropertiesUtil.verifyStringProperty(
+				properties, RemoteConstants.ENDPOINT_CONTAINER_ID_NAMESPACE);
 		return IDUtil.createID(properties, containerIDNamespace);
 	}
 

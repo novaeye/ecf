@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Composent, Inc. and others. All rights reserved. This
+ * Copyright (c) 2010-2011 Composent, Inc. and others. All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -23,7 +23,9 @@ import org.eclipse.ecf.discovery.IDiscoveryAdvertiser;
 import org.eclipse.ecf.discovery.IDiscoveryLocator;
 import org.eclipse.ecf.discovery.IServiceInfo;
 import org.eclipse.ecf.osgi.services.remoteserviceadmin.DiscoveredEndpointDescriptionFactory;
+import org.eclipse.ecf.osgi.services.remoteserviceadmin.EndpointDescriptionReader;
 import org.eclipse.ecf.osgi.services.remoteserviceadmin.IDiscoveredEndpointDescriptionFactory;
+import org.eclipse.ecf.osgi.services.remoteserviceadmin.IEndpointDescriptionReader;
 import org.eclipse.ecf.osgi.services.remoteserviceadmin.IServiceInfoFactory;
 import org.eclipse.ecf.osgi.services.remoteserviceadmin.ServiceInfoFactory;
 import org.eclipse.equinox.concurrent.future.IExecutor;
@@ -62,6 +64,8 @@ public class Discovery {
 	// endpoint description factory tracker
 	private Object endpointDescriptionFactoryTrackerLock = new Object();
 	private ServiceTracker endpointDescriptionFactoryTracker;
+	// endpointDescriptionReader default
+	private ServiceRegistration defaultEndpointDescriptionReaderRegistration;
 
 	// For processing synchronous notifications asynchronously
 	private EventManager eventManager;
@@ -104,6 +108,10 @@ public class Discovery {
 						IDiscoveredEndpointDescriptionFactory.class.getName(),
 						defaultEndpointDescriptionFactory,
 						(Dictionary) properties);
+		// setup/register default endpointDescriptionReader
+		defaultEndpointDescriptionReaderRegistration = context.registerService(
+				IEndpointDescriptionReader.class.getName(),
+				new EndpointDescriptionReader(), properties);
 
 		// Create thread group, event manager, and eventQueue, and setup to
 		// dispatch EndpointListenerEvents
@@ -188,7 +196,7 @@ public class Discovery {
 		// Create bundle tracker for reading local/xml-file endpoint
 		// descriptions
 		bundleTrackerCustomizer = new EndpointDescriptionBundleTrackerCustomizer(
-				localLocatorServiceListener);
+				context, localLocatorServiceListener);
 		bundleTracker = new BundleTracker(context, Bundle.ACTIVE
 				| Bundle.STARTING, bundleTrackerCustomizer);
 		// This may trigger local endpoint description discovery
@@ -280,6 +288,10 @@ public class Discovery {
 			serviceInfoFactory.close();
 			serviceInfoFactory = null;
 		}
+		if (defaultEndpointDescriptionReaderRegistration != null) {
+			defaultEndpointDescriptionReaderRegistration.unregister();
+			defaultEndpointDescriptionReaderRegistration = null;
+		}
 		if (locatorServiceTracker != null) {
 			locatorServiceTracker.close();
 			locatorServiceTracker = null;
@@ -302,17 +314,20 @@ public class Discovery {
 				advertiserTracker.open();
 			}
 		}
-		ServiceReference[] advertiserRefs = advertiserTracker.getServiceReferences();
-		if (advertiserRefs == null) return null;
+		ServiceReference[] advertiserRefs = advertiserTracker
+				.getServiceReferences();
+		if (advertiserRefs == null)
+			return null;
 		List<IDiscoveryAdvertiser> results = new ArrayList<IDiscoveryAdvertiser>();
-		for(int i=0; i < advertiserRefs.length; i++) {
-			results.add((IDiscoveryAdvertiser) context.getService(advertiserRefs[i]));
+		for (int i = 0; i < advertiserRefs.length; i++) {
+			results.add((IDiscoveryAdvertiser) context
+					.getService(advertiserRefs[i]));
 		}
 		return results.toArray(new IDiscoveryAdvertiser[results.size()]);
 	}
 
 	private void openLocator(IDiscoveryLocator locator) {
-		if (locator == null || context == null)
+		if (context == null)
 			return;
 		synchronized (locatorListeners) {
 			LocatorServiceListener locatorListener = new LocatorServiceListener(
@@ -349,7 +364,8 @@ public class Discovery {
 
 	Collection<org.osgi.service.remoteserviceadmin.EndpointDescription> getAllDiscoveredEndpointDescriptions() {
 		Collection<org.osgi.service.remoteserviceadmin.EndpointDescription> result = new ArrayList();
-		if (localLocatorServiceListener == null) return result;
+		if (localLocatorServiceListener == null)
+			return result;
 		// Get local first
 		result.addAll(localLocatorServiceListener.getEndpointDescriptions());
 		synchronized (locatorListeners) {
@@ -455,7 +471,8 @@ public class Discovery {
 		public Object addingService(ServiceReference reference) {
 			IDiscoveryLocator locator = (IDiscoveryLocator) context
 					.getService(reference);
-			openLocator(locator);
+			if (locator != null)
+				openLocator(locator);
 			return locator;
 		}
 

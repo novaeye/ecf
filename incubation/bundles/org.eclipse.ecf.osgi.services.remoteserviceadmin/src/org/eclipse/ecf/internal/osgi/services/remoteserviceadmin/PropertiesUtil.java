@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Composent, Inc. and others. All rights reserved. This
+ * Copyright (c) 2010-2011 Composent, Inc. and others. All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -22,6 +22,9 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.ecf.osgi.services.remoteserviceadmin.RemoteConstants;
+import org.eclipse.ecf.remoteservice.IRemoteServiceReference;
+import org.eclipse.ecf.remoteservice.IRemoteServiceRegistration;
+import org.osgi.framework.ServiceReference;
 
 public class PropertiesUtil {
 
@@ -56,7 +59,7 @@ public class PropertiesUtil {
 			RemoteConstants.ENDPOINT_IDFILTER_IDS,
 			RemoteConstants.ENDPOINT_IDFILTER_IDARRAY_COUNT,
 			RemoteConstants.ENDPOINT_REMOTESERVICE_FILTER,
-			RemoteConstants.ENDPOINT_REMOTESERVICE_ID,
+			RemoteConstants.ENDPOINT_SERVICE_IMPORTED_CONFIGS_VALUE,
 			RemoteConstants.SERVICE_EXPORTED_CONTAINER_CONNECT_CONTEXT,
 			RemoteConstants.SERVICE_EXPORTED_CONTAINER_FACTORY_ARGS,
 			RemoteConstants.SERVICE_EXPORTED_CONTAINER_ID,
@@ -71,6 +74,20 @@ public class PropertiesUtil {
 					"property value is not a String: " + propName);
 			iae.initCause(e);
 			throw iae;
+		}
+	}
+
+	public static Object getStringPlusValue(List<String> values) {
+		if (values == null)
+			return null;
+		int valuesSize = values.size();
+		switch (valuesSize) {
+		case 0:
+			return null;
+		case 1:
+			return values.get(0);
+		default:
+			return values.toArray(new String[valuesSize]);
 		}
 	}
 
@@ -111,22 +128,17 @@ public class PropertiesUtil {
 	}
 
 	public static boolean isOSGiProperty(String key) {
-		if (key == null)
-			return false;
-		return osgiProperties.contains(key) && !key.startsWith(org.osgi.service.remoteserviceadmin.RemoteConstants.ENDPOINT_PACKAGE_VERSION_);
+		return osgiProperties.contains(key)
+				&& !key.startsWith(org.osgi.service.remoteserviceadmin.RemoteConstants.ENDPOINT_PACKAGE_VERSION_);
 	}
 
 	public static boolean isECFProperty(String key) {
-		if (key == null)
-			return false;
 		return ecfProperties.contains(key)
 				&& !key.startsWith(RemoteConstants.ENDPOINT_IDFILTER_IDARRAY_NAME_)
 				&& !key.startsWith(RemoteConstants.ENDPOINT_IDFILTER_IDARRAY_NAMESPACE_);
 	}
 
-	public static boolean isStandardProperty(String key) {
-		if (key == null)
-			return false;
+	public static boolean isReservedProperty(String key) {
 		return isOSGiProperty(key) || isECFProperty(key);
 	}
 
@@ -155,8 +167,6 @@ public class PropertiesUtil {
 	}
 
 	public static Long getLongWithDefault(Map props, String key, Long def) {
-		if (props == null)
-			return def;
 		Object o = props.get(key);
 		if (o instanceof Long)
 			return (Long) o;
@@ -167,8 +177,6 @@ public class PropertiesUtil {
 
 	public static String[] getStringArrayWithDefault(
 			Map<String, Object> properties, String key, String[] def) {
-		if (properties == null)
-			return def;
 		Object o = properties.get(key);
 		if (o instanceof String) {
 			return new String[] { (String) o };
@@ -182,22 +190,77 @@ public class PropertiesUtil {
 	}
 
 	public static String getStringWithDefault(Map props, String key, String def) {
-		if (props == null)
-			return def;
 		Object o = props.get(key);
 		if (o == null || (!(o instanceof String)))
 			return def;
 		return (String) o;
 	}
 
-	public static Map<String, Object> getNonECFProperties(
-			Map<String, Object> parsedProperties) {
-		Map<String, Object> result = new HashMap<String, Object>();
-		for (String key : parsedProperties.keySet())
-			if (!isECFProperty(key))
-				result.put(key, parsedProperties.get(key));
-		return result;
+	public static Map<String, Object> copyProperties(
+			ServiceReference serviceReference, Map<String, Object> target) {
+		String[] keys = serviceReference.getPropertyKeys();
+		for (int i = 0; i < keys.length; i++)
+			target.put(keys[i], serviceReference.getProperty(keys[i]));
+		return target;
 	}
 
+	public static Map<String, Object> copyProperties(
+			IRemoteServiceRegistration rsRegistration,
+			Map<String, Object> target) {
+		String[] keys = rsRegistration.getPropertyKeys();
+		for (int i = 0; i < keys.length; i++)
+			target.put(keys[i], rsRegistration.getProperty(keys[i]));
+		return target;
+	}
+
+	public static Map<String, Object> copyProperties(
+			Map<String, Object> source, Map<String, Object> target) {
+		for (String key : source.keySet())
+			target.put(key, source.get(key));
+		return target;
+	}
+
+	public static Map<String, Object> copyNonECFProperties(
+			Map<String, Object> source, Map<String, Object> target) {
+		for (String key : source.keySet())
+			if (!isECFProperty(key))
+				target.put(key, source.get(key));
+		return target;
+	}
+
+	public static Map<String, Object> copyNonReservedProperties(
+			Map<String, Object> source, Map<String, Object> target) {
+		for (String key : source.keySet())
+			if (!isReservedProperty(key))
+				target.put(key, source.get(key));
+		return target;
+	}
+
+	public static Map<String, Object> copyNonECFProperties(
+			ServiceReference serviceReference, Map<String, Object> target) {
+		String[] keys = serviceReference.getPropertyKeys();
+		for (int i = 0; i < keys.length; i++)
+			if (!isECFProperty(keys[i]))
+				target.put(keys[i], serviceReference.getProperty(keys[i]));
+		return target;
+	}
+
+	public static Map<String, Object> copyNonReservedProperties(
+			ServiceReference serviceReference, Map<String, Object> target) {
+		String[] keys = serviceReference.getPropertyKeys();
+		for (int i = 0; i < keys.length; i++)
+			if (!isReservedProperty(keys[i]))
+				target.put(keys[i], serviceReference.getProperty(keys[i]));
+		return target;
+	}
+
+	public static Map<String, Object> copyNonReservedProperties(
+			IRemoteServiceReference rsReference, Map<String, Object> target) {
+		String[] keys = rsReference.getPropertyKeys();
+		for (int i = 0; i < keys.length; i++)
+			if (!isReservedProperty(keys[i]))
+				target.put(keys[i], rsReference.getProperty(keys[i]));
+		return target;
+	}
 
 }

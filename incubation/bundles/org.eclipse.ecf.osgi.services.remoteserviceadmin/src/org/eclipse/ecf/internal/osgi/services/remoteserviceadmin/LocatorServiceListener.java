@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Composent, Inc. and others. All rights reserved. This
+ * Copyright (c) 2010-2011 Composent, Inc. and others. All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -38,6 +38,9 @@ class LocatorServiceListener implements IServiceListener {
 	public LocatorServiceListener(Discovery discovery, IDiscoveryLocator locator) {
 		this.discovery = discovery;
 		this.locator = locator;
+		if (locator != null) {
+			this.locator.addServiceListener(this);
+		}
 	}
 
 	public void serviceDiscovered(IServiceEvent anEvent) {
@@ -58,7 +61,7 @@ class LocatorServiceListener implements IServiceListener {
 	void handleService(IServiceInfo serviceInfo, boolean discovered) {
 		IServiceID serviceID = serviceInfo.getServiceID();
 		if (matchServiceID(serviceID))
-			handleOSGiServiceEndpoint(serviceID, serviceInfo, true);
+			handleOSGiServiceEndpoint(serviceID, serviceInfo, discovered);
 	}
 
 	private void handleOSGiServiceEndpoint(IServiceID serviceId,
@@ -72,8 +75,9 @@ class LocatorServiceListener implements IServiceListener {
 					discoveredEndpointDescription.getEndpointDescription(),
 					discovered);
 		} else {
-			logWarning("handleOSGiServiceEvent","discoveredEndpointDescription is null for service info="
-					+ serviceInfo + ",discovered=" + discovered);
+			logWarning("handleOSGiServiceEvent",
+					"discoveredEndpointDescription is null for service info="
+							+ serviceInfo + ",discovered=" + discovered);
 		}
 	}
 
@@ -99,7 +103,8 @@ class LocatorServiceListener implements IServiceListener {
 	}
 
 	private void logWarning(String methodName, String message) {
-		LogUtility.logWarning(methodName, DebugOptions.DISCOVERY, this.getClass(), message);
+		LogUtility.logWarning(methodName, DebugOptions.DISCOVERY,
+				this.getClass(), message);
 	}
 
 	private void logError(String methodName, String message) {
@@ -149,8 +154,11 @@ class LocatorServiceListener implements IServiceListener {
 		}
 	}
 
-	public void close() {
-		locator = null;
+	public synchronized void close() {
+		if (locator != null) {
+			locator.removeServiceListener(this);
+			locator = null;
+		}
 		discovery = null;
 		discoveredEndpointDescriptions.clear();
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Composent, Inc. and others. All rights reserved. This
+ * Copyright (c) 2010-2011 Composent, Inc. and others. All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -21,8 +21,6 @@ public class RemoteConstants {
 
 	// container id namespace. Value of type String
 	public static final String ENDPOINT_CONTAINER_ID_NAMESPACE = "ecf.endpoint.id.ns";
-	// remote service id. Value of type Long
-	public static final String ENDPOINT_REMOTESERVICE_ID = "ecf.endpoint.remoteservice.id";
 	// target id. Value of type String
 	public static final String ENDPOINT_CONNECTTARGET_ID = "ecf.endpoint.connecttarget.id";
 	// target namespace. Value of type String
@@ -37,6 +35,11 @@ public class RemoteConstants {
 	public static final String ENDPOINT_IDFILTER_IDARRAY_NAMESPACE_ = "ecf.endpoint.idfilter.id.ns.";
 	// remote service filter. Value of type String
 	public static final String ENDPOINT_REMOTESERVICE_FILTER = "ecf.endpoint.rsfilter";
+
+	// Value of
+	// org.osgi.service.remoteserviceadmin.RemoteConstants.SERVICE_IMPORTED_CONFIGS
+	// For ECF providers this is a constant, and receivers of
+	public static final String ENDPOINT_SERVICE_IMPORTED_CONFIGS_VALUE = "org.eclipse.ecf.config";
 
 	// Value of type String,ID,or Object[]
 	public static final String SERVICE_EXPORTED_CONTAINER_FACTORY_ARGS = "ecf.exported.containerfactoryargs";

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Composent, Inc. and others. All rights reserved. This
+ * Copyright (c) 2010-2011 Composent, Inc. and others. All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -154,7 +154,8 @@ public class ServiceInfoFactory extends AbstractMetadataFactory implements
 			try {
 				host = InetAddress.getLocalHost().getHostAddress();
 			} catch (Exception e) {
-				logWarning("createURI", //$NON-NLS-1$
+				logWarning(
+						"createURI", //$NON-NLS-1$
 						"failed to get local host adress, falling back to \'localhost\'.", e); //$NON-NLS-1$
 				host = "localhost"; //$NON-NLS-1$
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2010 Composent, Inc. and others. All rights reserved. This
+ * Copyright (c) 2010-2011 Composent, Inc. and others. All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
@@ -119,13 +119,23 @@ public abstract class AbstractTopologyManager {
 		return remoteServiceAdmin;
 	}
 
-	protected RemoteServiceAdmin selectUnexportRemoteServiceAdmin(ServiceReference serviceReference) {
+	protected RemoteServiceAdmin selectUnexportRemoteServiceAdmin(
+			ServiceReference serviceReference) {
 		synchronized (remoteServiceAdminLock) {
 			return remoteServiceAdmin;
 		}
 	}
-	
-	protected org.osgi.service.remoteserviceadmin.RemoteServiceAdmin selectImportRemoteServiceAdmin(
+
+	protected RemoteServiceAdmin selectImportRemoteServiceAdmin(
+			EndpointDescription endpoint) {
+		synchronized (remoteServiceAdminLock) {
+			if (remoteServiceAdmin == null)
+				remoteServiceAdmin = new RemoteServiceAdmin(getContext());
+		}
+		return remoteServiceAdmin;
+	}
+
+	protected RemoteServiceAdmin selectUnimportRemoteServiceAdmin(
 			EndpointDescription endpoint) {
 		synchronized (remoteServiceAdminLock) {
 			if (remoteServiceAdmin == null)
@@ -197,36 +207,42 @@ public abstract class AbstractTopologyManager {
 				this.getClass(), message);
 	}
 
-	protected void advertiseEndpointDescription(EndpointDescription endpointDescription) {
+	protected void advertiseEndpointDescription(
+			EndpointDescription endpointDescription) {
 		IEndpointDescriptionAdvertiser advertiser = getEndpointDescriptionAdvertiser();
 		if (advertiser == null) {
-			logError("advertiseExportedRegistration",
+			logError(
+					"advertiseExportedRegistration",
 					"No endpoint description advertiser available to advertise endpointDescription="
 							+ endpointDescription);
 			return;
 		}
-		// Now advertise endpoint description using endpoint description advertiser
+		// Now advertise endpoint description using endpoint description
+		// advertiser
 		IStatus result = advertiser.advertise(endpointDescription);
 		if (!result.isOK())
 			logError("advertiseExportedRegistration",
-					"Advertise of endpointDescription=" + endpointDescription + " FAILED",
-					result);
+					"Advertise of endpointDescription=" + endpointDescription
+							+ " FAILED", result);
 	}
 
-	protected void unadvertiseEndpointDescription(EndpointDescription endpointDescription) {
+	protected void unadvertiseEndpointDescription(
+			EndpointDescription endpointDescription) {
 		IEndpointDescriptionAdvertiser advertiser = getEndpointDescriptionAdvertiser();
 		if (advertiser == null) {
-			logError("advertiseExportedRegistration",
+			logError(
+					"unadvertiseEndpointDescription",
 					"No endpoint description advertiser available to unadvertise endpointDescription="
 							+ endpointDescription);
 			return;
 		}
-		// Now unadvertise endpoint description using endpoint description advertiser
+		// Now unadvertise endpoint description using endpoint description
+		// advertiser
 		IStatus result = advertiser.unadvertise(endpointDescription);
 		if (!result.isOK())
-			logError("advertiseExportedRegistration",
-					"Unadvertise of endpointDescription=" + endpointDescription + " FAILED",
-					result);
+			logError("unadvertiseEndpointDescription",
+					"Unadvertise of endpointDescription=" + endpointDescription
+							+ " FAILED", result);
 	}
 
 	protected void logError(String methodName, String message, IStatus result) {
