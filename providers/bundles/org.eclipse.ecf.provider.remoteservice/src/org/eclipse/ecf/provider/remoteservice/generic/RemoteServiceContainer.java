@@ -137,4 +137,11 @@ public class RemoteServiceContainer extends TCPClientSOContainer implements IRem
 	public IFuture asyncGetRemoteServiceReferences(ID target, ID[] idFilter, String clazz, String filter) {
 		return registry.asyncGetRemoteServiceReferences(target, idFilter, clazz, filter);
 	}
+
+	/**
+	 * @since 4.0
+	 */
+	public boolean setRemoteServiceCallPolicy(IRemoteServiceCallPolicy policy) {
+		return registry.setRemoteServiceCallPolicy(policy);
+	}
 }

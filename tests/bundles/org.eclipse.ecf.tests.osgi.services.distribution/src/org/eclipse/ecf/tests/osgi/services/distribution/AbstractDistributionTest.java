@@ -9,13 +9,13 @@
  ******************************************************************************/
 package org.eclipse.ecf.tests.osgi.services.distribution;
 
+import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Properties;
 
 import org.eclipse.ecf.core.identity.ID;
 import org.eclipse.ecf.core.util.Trace;
-import org.eclipse.ecf.osgi.services.discovery.RemoteServicePublication;
 import org.eclipse.ecf.osgi.services.distribution.IDistributionConstants;
 import org.eclipse.ecf.remoteservice.IRemoteService;
 import org.eclipse.ecf.remoteservice.IRemoteServiceContainerAdapter;
@@ -35,8 +35,7 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 
 public abstract class AbstractDistributionTest extends
-		ContainerAbstractTestCase implements IDistributionConstants,
-		RemoteServicePublication {
+		ContainerAbstractTestCase implements IDistributionConstants {
 
 	protected IRemoteServiceContainerAdapter[] adapters = null;
 
@@ -47,6 +46,14 @@ public abstract class AbstractDistributionTest extends
 	 * org.eclipse.ecf.tests.ContainerAbstractTestCase#getClientContainerName()
 	 */
 	protected abstract String getClientContainerName();
+
+	protected void startTest(String testname) {
+		System.out.println("====starting "+this.getClass().getName()+"."+testname+"====");
+	}
+
+	protected void endTest(String testname) {
+		System.out.println("====ending "+this.getClass().getName()+"."+testname+"====");
+	}
 
 	protected void tearDown() throws Exception {
 		super.tearDown();
@@ -185,7 +192,7 @@ public abstract class AbstractDistributionTest extends
 				.getProperty(org.osgi.framework.Constants.OBJECTCLASS);
 		assertTrue(classes != null);
 		// Check object class
-		assertTrue(classname.equals(classes[0]));
+		assertTrue(Arrays.asList(classes).contains(classname));
 	}
 
 	protected void assertReferencesValidAndFirstHasCorrectType(
@@ -236,7 +243,7 @@ public abstract class AbstractDistributionTest extends
 								+ reference + ",svc=" + service);
 					}
 				});
-		st.open();
+		st.open(true);
 		return st;
 	}
 

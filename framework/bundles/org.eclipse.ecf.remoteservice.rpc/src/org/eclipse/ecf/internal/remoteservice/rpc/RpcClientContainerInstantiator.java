@@ -1,11 +1,12 @@
-/*******************************************************************************
- * Copyright (c) 2010 Naumen. All rights reserved. This
+/******************************************************************************* 
+ * Copyright (c) 2010-2011 Naumen. All rights reserved. This
  * program and the accompanying materials are made available under the terms of
  * the Eclipse Public License v1.0 which accompanies this distribution, and is
  * available at http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors: Pavel Samolisov - initial API and implementation
- ******************************************************************************/
+ * Contributors:
+ *   Pavel Samolisov - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.ecf.internal.remoteservice.rpc;
 
 import java.util.*;
@@ -32,7 +33,7 @@ public class RpcClientContainerInstantiator extends BaseContainerInstantiator im
 				ID = (RpcId) IDFactory.getDefault().createID(RpcNamespace.NAME, parameters);
 			return new RpcClientContainer(ID);
 		} catch (Exception e) {
-			throw new ContainerCreateException(Messages.PRC_COULD_NOT_CREATE_CONTAINER, e);
+			throw new ContainerCreateException(Messages.RPC_COULD_NOT_CREATE_CONTAINER, e);
 		}
 	}
 

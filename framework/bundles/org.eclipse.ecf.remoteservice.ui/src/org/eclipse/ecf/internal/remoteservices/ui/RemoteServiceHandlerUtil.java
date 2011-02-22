@@ -29,21 +29,26 @@ import org.osgi.framework.InvalidSyntaxException;
 
 public class RemoteServiceHandlerUtil {
 
-	public static IRemoteServiceContainerAdapter getActiveIRemoteServiceContainerAdapterChecked(ExecutionEvent event) throws ExecutionException {
+	public static IRemoteServiceContainerAdapter getActiveIRemoteServiceContainerAdapterChecked(
+			ExecutionEvent event) throws ExecutionException {
 		final ID activeConnectId = getActiveConnectIDChecked(event);
 		final IContainer container = getContainerWithConnectID(activeConnectId);
 		if (container == null) {
 			return null;
 		}
-		final IRemoteServiceContainerAdapter adapter = (IRemoteServiceContainerAdapter) container.getAdapter(IRemoteServiceContainerAdapter.class);
+		final IRemoteServiceContainerAdapter adapter = (IRemoteServiceContainerAdapter) container
+				.getAdapter(IRemoteServiceContainerAdapter.class);
 		return adapter;
 	}
-	
-	public static IRemoteServiceReference[] getActiveIRemoteServiceReferencesChecked(ExecutionEvent event) throws ExecutionException {
-		final IServiceInfo serviceInfo = DiscoveryHandlerUtil.getActiveIServiceInfoChecked(event);
+
+	public static IRemoteServiceReference[] getActiveIRemoteServiceReferencesChecked(
+			ExecutionEvent event) throws ExecutionException {
+		final IServiceInfo serviceInfo = DiscoveryHandlerUtil
+				.getActiveIServiceInfoChecked(event);
 		final IRemoteServiceContainerAdapter adapter = getActiveIRemoteServiceContainerAdapterChecked(event);
 		try {
-			return getRemoteServiceReferencesForRemoteServiceAdapter(adapter, serviceInfo);
+			return getRemoteServiceReferencesForRemoteServiceAdapter(adapter,
+					serviceInfo);
 		} catch (IDCreateException e) {
 			throw new ExecutionException(e.getMessage(), e);
 		} catch (InvalidSyntaxException e) {
@@ -51,8 +56,10 @@ public class RemoteServiceHandlerUtil {
 		}
 	}
 
-	public static ID getActiveConnectIDChecked(ExecutionEvent event) throws ExecutionException {
-		final IServiceInfo serviceInfo = DiscoveryHandlerUtil.getActiveIServiceInfoChecked(event);
+	public static ID getActiveConnectIDChecked(ExecutionEvent event)
+			throws ExecutionException {
+		final IServiceInfo serviceInfo = DiscoveryHandlerUtil
+				.getActiveIServiceInfoChecked(event);
 		final String connectNamespace = getConnectNamespace(serviceInfo);
 		final String connectId = getConnectID(serviceInfo);
 		try {
@@ -62,31 +69,37 @@ public class RemoteServiceHandlerUtil {
 		}
 	}
 
-	public static IContainer getActiveIRemoteServiceContainerChecked(ExecutionEvent event) throws ExecutionException {
-		final IServiceInfo serviceInfo = DiscoveryHandlerUtil.getActiveIServiceInfoChecked(event);
+	public static IContainer getActiveIRemoteServiceContainerChecked(
+			ExecutionEvent event) throws ExecutionException {
+		final IServiceInfo serviceInfo = DiscoveryHandlerUtil
+				.getActiveIServiceInfoChecked(event);
 		final ID createConnectId = getActiveConnectIDChecked(event);
 		final IContainer container = getContainerWithConnectID(createConnectId);
 		if (container != null) {
 			return container;
 		}
-		//TODO remove parameters once https://bugs.eclipse.org/bugs/show_bug.cgi?id=256586 is fixed
+		// TODO remove parameters once
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=256586 is fixed
 		final Object[] parameters = new Object[] { createConnectId };
 		try {
-		// If it's not there and already connected then create and return new one
-			return ContainerFactory.getDefault().createContainer(getContainerFactory(serviceInfo), parameters);
+			// If it's not there and already connected then create and return
+			// new one
+			return ContainerFactory.getDefault().createContainer(
+					getContainerFactory(serviceInfo), parameters);
 		} catch (ContainerCreateException e) {
 			throw new ExecutionException(e.getMessage(), e);
 		}
 	}
-	
-	//TODO push this functionality down into the ContainerManager
+
+	// TODO push this functionality down into the ContainerManager
 	private static IContainer getContainerWithConnectID(ID aConnectedID) {
-		final IContainerManager containerManager = Activator.getDefault().getContainerManager();
+		final IContainerManager containerManager = Activator.getDefault()
+				.getContainerManager();
 		final IContainer[] containers = containerManager.getAllContainers();
 		if (containers == null) {
 			return null;
 		}
-		for(int i=0; i < containers.length; i++) {
+		for (int i = 0; i < containers.length; i++) {
 			ID connectedId = containers[i].getConnectedID();
 			if (connectedId != null && connectedId.equals(aConnectedID)) {
 				return containers[i];
@@ -95,39 +108,54 @@ public class RemoteServiceHandlerUtil {
 		return null;
 	}
 
-	private static IRemoteServiceReference[] getRemoteServiceReferencesForRemoteServiceAdapter(IRemoteServiceContainerAdapter adapter, IServiceInfo serviceInfo) throws InvalidSyntaxException, IDCreateException {
-		if(adapter == null) {
-			return null;
-		}
+	private static IRemoteServiceReference[] getRemoteServiceReferencesForRemoteServiceAdapter(
+			IRemoteServiceContainerAdapter adapter, IServiceInfo serviceInfo)
+			throws InvalidSyntaxException, IDCreateException {
 		ID serviceID = null;
 		final String serviceNamespace = getServiceNamespace(serviceInfo);
 		final String serviceid = getServiceID(serviceInfo);
 		if (serviceNamespace != null && serviceid != null) {
-			serviceID = IDFactory.getDefault().createID(serviceNamespace, serviceid);
+			serviceID = IDFactory.getDefault().createID(serviceNamespace,
+					serviceid);
 		}
-		final ID[] targets = (serviceID == null) ? null : new ID[] {serviceID};
-		return adapter.getRemoteServiceReferences(targets, getRemoteServiceClass(serviceInfo), getFilter(serviceInfo));
+		final ID[] targets = (serviceID == null) ? null
+				: new ID[] { serviceID };
+		return adapter.getRemoteServiceReferences(targets,
+				getRemoteServiceClass(serviceInfo), null);
 	}
-	
+
 	private static String getServiceNamespace(IServiceInfo serviceInfo) {
-		return serviceInfo.getServiceProperties().getPropertyString(Constants.SERVICE_IDFILTER_NAMESPACE);
+		return serviceInfo.getServiceProperties().getPropertyString(
+				Constants.SERVICE_IDFILTER_NAMESPACE);
 	}
+
 	private static String getServiceID(IServiceInfo serviceInfo) {
-		return serviceInfo.getServiceProperties().getPropertyString(Constants.SERVICE_IDFILTER_ID);
+		return serviceInfo.getServiceProperties().getPropertyString(
+				Constants.SERVICE_IDFILTER_ID);
 	}
+
 	private static String getRemoteServiceClass(IServiceInfo serviceInfo) {
-		return serviceInfo.getServiceProperties().getPropertyString(Constants.SERVICE_OBJECTCLASS);
+		return serviceInfo.getServiceProperties().getPropertyString(
+				Constants.SERVICE_OBJECTCLASS);
 	}
+
 	private static String getFilter(IServiceInfo serviceInfo) {
-		return serviceInfo.getServiceProperties().getPropertyString(Constants.SERVICE_FILTER_PROPERTY);
+		return serviceInfo.getServiceProperties().getPropertyString(
+				Constants.SERVICE_FILTER_PROPERTY);
 	}
+
 	private static String getConnectNamespace(IServiceInfo serviceInfo) {
-		return serviceInfo.getServiceProperties().getPropertyString(Constants.SERVICE_CONNECT_ID_NAMESPACE);
+		return serviceInfo.getServiceProperties().getPropertyString(
+				Constants.SERVICE_CONNECT_ID_NAMESPACE);
 	}
+
 	private static String getConnectID(IServiceInfo serviceInfo) {
-		return serviceInfo.getServiceProperties().getPropertyString(Constants.SERVICE_CONNECT_ID);
+		return serviceInfo.getServiceProperties().getPropertyString(
+				Constants.SERVICE_CONNECT_ID);
 	}
+
 	private static String getContainerFactory(IServiceInfo serviceInfo) {
-		return serviceInfo.getServiceProperties().getPropertyString(Constants.SERVICE_CONTAINER_FACTORY_NAME);
+		return serviceInfo.getServiceProperties().getPropertyString(
+				Constants.SERVICE_CONTAINER_FACTORY_NAME);
 	}
 }

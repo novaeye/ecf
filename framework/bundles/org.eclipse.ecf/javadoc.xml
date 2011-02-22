@@ -15,7 +15,7 @@
         	author="false" 
         	classpathref="files.classpath" 
         	destdir="${output}" 
-        	doctitle="Eclipse Communication Framework (ECF) 3.4.0" 
+        	doctitle="Eclipse Communication Framework (ECF) 3.5.0" 
         	nodeprecated="false" 
         	nodeprecatedlist="false" 
         	noindex="false" 
@@ -37,6 +37,10 @@
 	        	<exclude name="**/ch/**"/>
 	        	<exclude name="**/jmdns/**"/>
 	        	<exclude name="**/tests/**"/>
+	        	<exclude name="**/sdo/**"/>
+	        	<exclude name="**/tutorial/**"/>
+	        	<exclude name="**/twitter/**"/>
+	        	<exclude name="**/jivesoftware/**"/>
         	</fileset>
     	</javadoc>
     </target>

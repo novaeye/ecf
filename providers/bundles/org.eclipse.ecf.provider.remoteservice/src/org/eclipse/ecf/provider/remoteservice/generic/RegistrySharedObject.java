@@ -26,11 +26,10 @@ import org.eclipse.ecf.core.util.*;
 import org.eclipse.ecf.internal.provider.remoteservice.Activator;
 import org.eclipse.ecf.internal.provider.remoteservice.IRemoteServiceProviderDebugOptions;
 import org.eclipse.ecf.remoteservice.*;
-import org.eclipse.ecf.remoteservice.Constants;
 import org.eclipse.ecf.remoteservice.events.*;
 import org.eclipse.equinox.concurrent.future.*;
 import org.eclipse.osgi.framework.eventmgr.*;
-import org.osgi.framework.*;
+import org.osgi.framework.InvalidSyntaxException;
 
 public class RegistrySharedObject extends BaseSharedObject implements IRemoteServiceContainerAdapter {
 
@@ -57,10 +56,6 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 	 * List of remote service listeners (added to/removed from by addRemoteServiceListener/removeRemoteServiceListener
 	 */
 	protected final List serviceListeners = new ArrayList();
-	/**
-	 * Local remote service registrations.  key:  ID (identifier of remote container), value:  List (instances of RemoteServiceRegistrationImpl for remote container)
-	 */
-	protected final Map localServiceRegistrations = new HashMap();
 	/**
 	 * Map of add registration requests.  key:  Integer (unique Request id), value: AddRegistrationRequest
 	 */
@@ -124,6 +119,9 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 	private static final String DEFAULT_EXECUTOR_TYPE = System.getProperty("org.eclipse.ecf.provider.remoteservice.executorType", "jobs"); //$NON-NLS-1$ //$NON-NLS-2$
 
 	private IExecutor requestExecutor;
+
+	private Object remoteServiceCallPolicyLock = new Object();
+	private IRemoteServiceCallPolicy remoteServiceCallPolicy;
 
 	public RegistrySharedObject() {
 		//
@@ -428,8 +426,6 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 	 * @see org.eclipse.ecf.core.sharedobject.BaseSharedObject#dispose(org.eclipse.ecf.core.identity.ID)
 	 */
 	public void dispose(ID containerID) {
-		unregisterAllServiceRegistrations();
-
 		synchronized (rsQueueLock) {
 			if (rsListenerDispatchEventManager != null) {
 				rsListenerDispatchEventManager.close();
@@ -439,7 +435,6 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 		}
 		synchronized (remoteRegistrys) {
 			remoteRegistrys.clear();
-			localServiceRegistrations.clear();
 		}
 		synchronized (serviceListeners) {
 			serviceListeners.clear();
@@ -655,7 +650,6 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 					if (regs != null) {
 						for (int j = 0; j < regs.length; j++) {
 							registry.unpublishService(regs[j]);
-							unregisterServiceRegistrationsForContainer(regs[j].getContainerID());
 							registrations.add(regs[j]);
 						}
 					}
@@ -677,7 +671,6 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 				if (registrations != null) {
 					for (int i = 0; i < registrations.length; i++) {
 						registry.unpublishService(registrations[i]);
-						unregisterServiceRegistrationsForContainer(registrations[i].getContainerID());
 					}
 				}
 			}
@@ -802,8 +795,7 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 
 	// generic
 	private Request createRequest(RemoteServiceRegistrationImpl remoteRegistration, IRemoteCall call, IRemoteCallListener listener) {
-		final RemoteServiceReferenceImpl refImpl = (RemoteServiceReferenceImpl) remoteRegistration.getReference();
-		return new Request(this.getLocalContainerID(), remoteRegistration.getServiceId(), RemoteCallImpl.createRemoteCall(refImpl.getRemoteClass(), call.getMethod(), call.getParameters(), call.getTimeout()), listener);
+		return new Request(this.getLocalContainerID(), remoteRegistration.getServiceId(), RemoteCallImpl.createRemoteCall(null, call.getMethod(), call.getParameters(), call.getTimeout()), listener);
 	}
 
 	void doFireRemoteServiceListeners(IRemoteServiceEvent event) {
@@ -1253,7 +1245,6 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 					if (!regList.contains(registrations[i])) {
 						addedRegistrations.add(registrations[i]);
 						registry.publishService(registrations[i]);
-						localRegisterService(registrations[i]);
 					}
 				}
 			}
@@ -1292,7 +1283,6 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 			if (!regList.contains(registration)) {
 				added = true;
 				registry.publishService(registration);
-				localRegisterService(registration);
 			}
 			notifyAddRegistrationResponse(remoteContainerID, requestId, null);
 		}
@@ -1320,50 +1310,6 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 		synchronized (addRegistrationRequests) {
 			return (AddRegistrationRequest) addRegistrationRequests.remove(requestId);
 		}
-	}
-
-	/**
-	 * @since 3.2
-	 */
-	protected void localRegisterService(RemoteServiceRegistrationImpl registration) {
-		final Object localServiceRegistrationValue = registration.getProperty(org.eclipse.ecf.remoteservice.Constants.AUTOREGISTER_REMOTE_PROXY);
-		if (localServiceRegistrationValue != null) {
-			final BundleContext context = Activator.getDefault().getContext();
-			if (context == null)
-				return;
-			final RemoteServiceImpl remoteServiceImpl = new RemoteServiceImpl(this, registration);
-			Object service;
-			try {
-				service = remoteServiceImpl.getProxy();
-			} catch (final ECFException e) {
-				e.printStackTrace();
-				log("localRegisterService", e); //$NON-NLS-1$
-				return;
-			}
-			final Hashtable properties = new Hashtable();
-			final String[] keys = registration.getPropertyKeys();
-			for (int i = 0; i < keys.length; i++) {
-				final Object value = registration.getProperty(keys[i]);
-				if (value != null) {
-					properties.put(keys[i], value);
-				}
-			}
-			final ID remoteContainerID = registration.getContainerID();
-			final ServiceRegistration serviceRegistration = context.registerService(registration.getClasses(), service, properties);
-			addLocalServiceRegistration(remoteContainerID, serviceRegistration);
-		}
-	}
-
-	/**
-	 * @since 3.2
-	 */
-	protected void addLocalServiceRegistration(ID remoteContainerID, ServiceRegistration registration) {
-		List containerRegistrations = (List) localServiceRegistrations.get(remoteContainerID);
-		if (containerRegistrations == null) {
-			containerRegistrations = new ArrayList();
-			localServiceRegistrations.put(remoteContainerID, containerRegistrations);
-		}
-		containerRegistrations.add(registration);
 	}
 
 	protected Request sendCallRequest(RemoteServiceRegistrationImpl remoteRegistration, final IRemoteCall call) throws IOException {
@@ -1420,6 +1366,12 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 				Response response = null;
 				Object result = null;
 				try {
+					// Get remote service call policy
+					IRemoteServiceCallPolicy callPolicy = getRemoteServiceCallPolicy();
+					// If it's set, then check remote call *before* actual invocation
+					if (callPolicy != null)
+						callPolicy.checkRemoteCall(responseTarget, localRegistration, call);
+
 					result = localRegistration.callService(call);
 					response = new Response(request.getRequestId(), result);
 					// Invocation target exception happens if the local method being invoked throws (cause)
@@ -1671,7 +1623,6 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 				registration = serviceRegistry.findRegistrationForServiceId(serviceId.longValue());
 				if (registration != null) {
 					serviceRegistry.unpublishService(registration);
-					unregisterServiceRegistrationsForContainer(registration.getContainerID());
 					// If there are no remaining registration for this remote service registry,
 					// then remove the registry from the remoteRegistrys
 					RemoteServiceRegistrationImpl[] registrations = serviceRegistry.getRegistrations();
@@ -1685,37 +1636,6 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 		if (registration != null)
 			fireRemoteServiceListeners(createUnregisteredEvent(registration));
 		Trace.exiting(Activator.PLUGIN_ID, IRemoteServiceProviderDebugOptions.METHODS_EXITING, this.getClass(), "handleUnregister"); //$NON-NLS-1$
-	}
-
-	/**
-	 * @since 3.2
-	 */
-	protected void unregisterServiceRegistrationsForContainer(ID containerID) {
-		if (containerID == null)
-			return;
-		final List containerRegistrations = (List) localServiceRegistrations.remove(containerID);
-		if (containerRegistrations != null) {
-			for (final Iterator i = containerRegistrations.iterator(); i.hasNext();) {
-				final ServiceRegistration serviceRegistration = (ServiceRegistration) i.next();
-				try {
-					serviceRegistration.unregister();
-				} catch (Exception e) {
-					// Simply log
-					log("unregister", e); //$NON-NLS-1$
-				}
-			}
-		}
-	}
-
-	/**
-	 * @since 3.2
-	 */
-	protected void unregisterAllServiceRegistrations() {
-		synchronized (remoteRegistrys) {
-			for (final Iterator i = localServiceRegistrations.keySet().iterator(); i.hasNext();) {
-				unregisterServiceRegistrationsForContainer((ID) i.next());
-			}
-		}
 	}
 
 	protected IRemoteServiceUnregisteredEvent createUnregisteredEvent(final RemoteServiceRegistrationImpl registration) {
@@ -1850,6 +1770,25 @@ public class RegistrySharedObject extends BaseSharedObject implements IRemoteSer
 			logException(MSG_INVOKE_ERROR_CODE, "Exception invoking shared object message=" + msg, e); //$NON-NLS-1$
 		}
 		return false;
+	}
+
+	/**
+	 * @since 4.0
+	 */
+	protected IRemoteServiceCallPolicy getRemoteServiceCallPolicy() {
+		synchronized (remoteServiceCallPolicyLock) {
+			return remoteServiceCallPolicy;
+		}
+	}
+
+	/**
+	 * @since 4.0
+	 */
+	public boolean setRemoteServiceCallPolicy(IRemoteServiceCallPolicy policy) {
+		synchronized (remoteServiceCallPolicyLock) {
+			this.remoteServiceCallPolicy = policy;
+			return true;
+		}
 	}
 
 }

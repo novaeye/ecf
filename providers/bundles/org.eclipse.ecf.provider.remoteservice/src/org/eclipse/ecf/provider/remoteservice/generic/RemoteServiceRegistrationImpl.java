@@ -10,8 +10,13 @@ package org.eclipse.ecf.provider.remoteservice.generic;
 
 import java.io.Serializable;
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.security.AccessController;
+import java.security.PrivilegedExceptionAction;
 import java.util.*;
 import org.eclipse.ecf.core.identity.ID;
+import org.eclipse.ecf.core.sharedobject.SharedObjectMsg;
+import org.eclipse.ecf.core.util.reflection.ClassUtil;
 import org.eclipse.ecf.remoteservice.*;
 
 /**
@@ -339,15 +344,22 @@ public class RemoteServiceRegistrationImpl implements IRemoteServiceRegistration
 	}
 
 	public Object callService(RemoteCallImpl call) throws Exception {
-		return call.invoke(service);
+		Object[] args = (call.getParameters() == null) ? SharedObjectMsg.nullArgs : call.getParameters();
+		final Method method = ClassUtil.getMethod(service.getClass(), call.getMethod(), SharedObjectMsg.getTypesForParameters(args));
+		AccessController.doPrivileged(new PrivilegedExceptionAction() {
+			public Object run() throws Exception {
+				if (!method.isAccessible())
+					method.setAccessible(true);
+				return null;
+			}
+		});
+		return method.invoke(service, args);
 	}
 
 	public String toString() {
 		StringBuffer buf = new StringBuffer("RemoteServiceRegistrationImpl["); //$NON-NLS-1$
 		buf.append("remoteServiceID=").append(getID()).append(";"); //$NON-NLS-1$ //$NON-NLS-2$
-		buf.append("containerID=").append(getContainerID()).append(";"); //$NON-NLS-1$ //$NON-NLS-2$
-		buf.append("serviceid=").append(getID().getContainerRelativeID()).append(";"); //$NON-NLS-1$ //$NON-NLS-2$
-		buf.append("serviceranking=").append(serviceranking).append(";"); //$NON-NLS-1$ //$NON-NLS-2$
+		buf.append("rserviceranking=").append(serviceranking).append(";"); //$NON-NLS-1$ //$NON-NLS-2$
 		buf.append("classes=").append(Arrays.asList(clazzes)).append(";"); //$NON-NLS-1$ //$NON-NLS-2$
 		buf.append("state=").append(state).append(";"); //$NON-NLS-1$ //$NON-NLS-2$
 		buf.append("properties=").append(properties).append("]"); //$NON-NLS-1$ //$NON-NLS-2$
